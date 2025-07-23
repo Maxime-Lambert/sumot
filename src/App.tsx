@@ -1,31 +1,67 @@
 import { useState } from "react";
-import reactLogo from "./assets/react.svg";
 import "./App.css";
+import Footer from "./components/application/Footer";
+import Header from "./components/application/Header";
+import Sumot from "./components/game/Sumot";
+import HowToPlayModal from "./components/application/modals/HowToPlayModal";
+import SettingsModal from "./components/application/modals/SettingsModal";
+import {
+  KeyboardLayouts,
+  type KeyboardLayoutsEnum,
+} from "./types/enums/KeyboardLayoutsEnum";
+import {
+  ColorBlindMode,
+  type ColorBlindModeEnum,
+} from "./types/enums/ColorBlindModeEnum";
+import Layout from "./components/application/Layout";
+import {
+  KeyboardType,
+  type KeyboardTypeEnum,
+} from "./types/enums/KeyboardTypeEnum";
 
-function App() {
-  const [count, setCount] = useState(0);
+export default function App() {
+  const [howToPlayModalOpen, setHowToPlayModalOpen] = useState(false);
+  const [settingsModalOpen, setSettingsModalOpen] = useState(false);
+  const [keyboardLayout, setKeyboardLayout] = useState<KeyboardLayoutsEnum>(
+    KeyboardLayouts.AZERTY
+  );
+  const [colorblindMode, setColorBlindMode] = useState<ColorBlindModeEnum>(
+    ColorBlindMode.NONE
+  );
+  const [keyboardType, setKeyboardType] = useState<KeyboardTypeEnum>(
+    KeyboardType.CORRECTION
+  );
 
   return (
-    <>
-      <div>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    <Layout
+      header={
+        <Header
+          onOpenHelp={() => setHowToPlayModalOpen(true)}
+          onOpenSettings={() => setSettingsModalOpen(true)}
+        />
+      }
+      footer={<Footer />}
+    >
+      <Sumot
+        colorblindMode={colorblindMode}
+        layoutType={keyboardLayout}
+        keyboardType={keyboardType}
+      />
+      <HowToPlayModal
+        isOpen={howToPlayModalOpen}
+        onClose={() => setHowToPlayModalOpen(false)}
+        colorblindMode={colorblindMode}
+      />
+      <SettingsModal
+        isOpen={settingsModalOpen}
+        onClose={() => setSettingsModalOpen(false)}
+        layoutType={keyboardLayout}
+        onLayoutChange={(layout) => setKeyboardLayout(layout)}
+        colorblindMode={colorblindMode}
+        onColorBlindChange={(mode) => setColorBlindMode(mode)}
+        keyboardType={keyboardType}
+        onKeyboardTypeChange={(mode) => setKeyboardType(mode)}
+      />
+    </Layout>
   );
 }
-
-export default App;
