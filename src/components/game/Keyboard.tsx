@@ -12,8 +12,8 @@ import {
   ColorBlindMode,
 } from "../../types/enums/ColorBlindModeEnum";
 import {
-  KeyboardType,
-  type KeyboardTypeEnum,
+  SmartKeyboardType,
+  type SmartKeyboardTypeEnum,
 } from "../../types/enums/KeyboardTypeEnum";
 
 type KeyboardProps = {
@@ -22,7 +22,7 @@ type KeyboardProps = {
   activeColIndex: number;
   gamestate: GameStatesEnum;
   colorblindMode: ColorBlindModeEnum;
-  keyboardType: KeyboardTypeEnum;
+  keyboardType: SmartKeyboardTypeEnum;
 };
 
 const LAYOUTS: Record<KeyboardLayoutsEnum, string[][]> = {
@@ -63,15 +63,15 @@ export default function Keyboard(props: KeyboardProps) {
   const getClassName = (key: string) => {
     if (props.gamestate !== GameStates.PLAYING) return "bg-primary text-white";
     switch (props.keyboardType) {
-      case KeyboardType.NONE:
+      case SmartKeyboardType.NONE:
         return "bg-primary text-white";
-      case KeyboardType.SIMPLE:
+      case SmartKeyboardType.SIMPLE:
         if (analyze.missing.has(key)) {
           return "bg-surface text-accent";
         }
 
         return "bg-primary text-white";
-      case KeyboardType.CORRECTION:
+      case SmartKeyboardType.CORRECTION:
         if (
           analyze.correct.has(props.activeColIndex) &&
           analyze.correct.get(props.activeColIndex) === key

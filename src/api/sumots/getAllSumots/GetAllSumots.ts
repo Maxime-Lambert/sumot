@@ -1,5 +1,5 @@
-import axios from "../axios";
-import type { Sumot } from "./Sumot";
+import axios from "../../axios";
+import type { Sumot } from "../../../types/Sumot";
 import type { SumotResponse } from "./SumotResponse";
 
 const STORAGE_SUMOTS_KEY = "sumots:all";

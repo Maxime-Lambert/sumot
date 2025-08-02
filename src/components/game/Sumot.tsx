@@ -4,23 +4,23 @@ import Keyboard from "./Keyboard";
 import type { Guess } from "../../types/Guess";
 import { type KeyboardLayoutsEnum } from "../../types/enums/KeyboardLayoutsEnum";
 import {
-  fetchInitialSumots,
-  updateSumotsFromDate,
-} from "../../api/getAllSumots/GetAllSumots";
-import type { Sumot } from "../../api/getAllSumots/Sumot";
-import {
   GameStates,
   type GameStatesEnum,
 } from "../../types/enums/GameStateEnum";
 import type { ColorBlindModeEnum } from "../../types/enums/ColorBlindModeEnum";
 import GameResultPanel from "./GameResultPanel";
+import type { Sumot } from "../../types/Sumot";
 import { evaluateGuess } from "../../services/EvaluateGuess";
-import type { KeyboardTypeEnum } from "../../types/enums/KeyboardTypeEnum";
+import type { SmartKeyboardTypeEnum } from "../../types/enums/KeyboardTypeEnum";
+import {
+  fetchInitialSumots,
+  updateSumotsFromDate,
+} from "../../api/sumots/getAllSumots/GetAllSumots";
 
 interface SumotProps {
   layoutType: KeyboardLayoutsEnum;
   colorblindMode: ColorBlindModeEnum;
-  keyboardType: KeyboardTypeEnum;
+  keyboardType: SmartKeyboardTypeEnum;
 }
 
 function getRandomInt(max: number) {
@@ -32,25 +32,25 @@ export default function Sumot(props: SumotProps) {
   const [currentGuess, setCurrentGuess] = useState("");
   const [status, setStatus] = useState<GameStatesEnum>(GameStates.LOADING);
   const [sumots, setSumots] = useState<Sumot[]>([]);
-  const [solution, setSolution] = useState<string>("");
+  const [solution, setSolution] = useState<Sumot>();
   const [activeColIndex, setActiveColIndex] = useState<number>(0);
 
   const onPlayAgain = () => {
     setActiveColIndex(0);
     setGuesses([]);
     setStatus(GameStates.PLAYING);
-    setSolution(sumots.at(getRandomInt(sumots.length))!.word);
+    setSolution(sumots.at(getRandomInt(sumots.length))!);
   };
 
   const MAX_ATTEMPTS = 6;
   const FLIP_ANIMATION_DURATION = 400;
   const FLIP_DELAY_BETWEEN_LETTERS = 200;
   const totalRevealTime = useMemo(() => {
-    return (
-      (solution.length - 1) *
-      (FLIP_DELAY_BETWEEN_LETTERS + FLIP_ANIMATION_DURATION)
-    );
-  }, [solution.length, FLIP_DELAY_BETWEEN_LETTERS, FLIP_ANIMATION_DURATION]);
+    return solution
+      ? (solution.word.length - 1) *
+          (FLIP_DELAY_BETWEEN_LETTERS + FLIP_ANIMATION_DURATION)
+      : 0;
+  }, [solution, FLIP_DELAY_BETWEEN_LETTERS, FLIP_ANIMATION_DURATION]);
 
   useEffect(() => {
     async function load() {
@@ -66,7 +66,7 @@ export default function Sumot(props: SumotProps) {
         setSumots(loaded);
         const today = new Date().toISOString().split("T")[0];
         const match = loaded.find((s) => s.day === today);
-        setSolution(match!.word);
+        setSolution(match);
       } catch (err) {
         console.error("Erreur lors du chargement des sumots", err);
       } finally {
@@ -81,16 +81,18 @@ export default function Sumot(props: SumotProps) {
       if (status !== GameStates.PLAYING) return;
       if (e.key === "Enter") {
         if (
-          currentGuess.length !== solution.length ||
+          currentGuess.length !== solution!.word.length ||
           !sumots.some(
             (s) => s.word.toUpperCase() === currentGuess.toUpperCase()
           )
         ) {
+          setStatus(GameStates.INVALID_GUESS);
+          setTimeout(() => setStatus(GameStates.PLAYING), 500);
           return;
         }
 
         const guessSnapshot = currentGuess;
-        const evaluation = evaluateGuess(guessSnapshot, solution);
+        const evaluation = evaluateGuess(guessSnapshot, solution!.word);
         const newAttempt = { word: guessSnapshot, result: evaluation };
         const newGuesses = [...guesses, newAttempt];
         setGuesses(newGuesses);
@@ -98,7 +100,7 @@ export default function Sumot(props: SumotProps) {
         setStatus(GameStates.REVEALING);
 
         setTimeout(() => {
-          if (guessSnapshot === solution) {
+          if (guessSnapshot === solution!.word) {
             setStatus(GameStates.WON);
           } else if (newGuesses.length >= MAX_ATTEMPTS) {
             setStatus(GameStates.LOST);
@@ -108,24 +110,37 @@ export default function Sumot(props: SumotProps) {
           }
         }, totalRevealTime);
       } else if (e.key === "Backspace") {
-        setCurrentGuess((prev) => {
-          if (activeColIndex > 0) {
-            if (activeColIndex === 4 && currentGuess[activeColIndex] !== " ") {
-              return prev.slice(0, activeColIndex) + " ";
-            } else {
-              const updated =
-                prev.slice(0, activeColIndex - 1) +
-                " " +
-                prev.slice(activeColIndex);
-              setActiveColIndex(activeColIndex - 1);
-              return updated;
+        if (currentGuess[activeColIndex] === " ") {
+          setCurrentGuess((prev) => {
+            if (activeColIndex > 0) {
+              if (
+                activeColIndex === 4 &&
+                currentGuess[activeColIndex] !== " "
+              ) {
+                return prev.slice(0, activeColIndex) + " ";
+              } else {
+                const updated =
+                  prev.slice(0, activeColIndex - 1) +
+                  " " +
+                  prev.slice(activeColIndex);
+                setActiveColIndex(activeColIndex - 1);
+                return updated;
+              }
             }
-          }
-          return prev;
-        });
+            return prev;
+          });
+        } else {
+          setCurrentGuess((prev) => {
+            const updated =
+              prev.slice(0, activeColIndex) +
+              " " +
+              prev.slice(activeColIndex + 1);
+            return updated;
+          });
+        }
       } else if (/^[a-zA-Z]$/.test(e.key)) {
-        const paddedGuess = currentGuess.padEnd(solution.length, " ");
-        const isLetterEditable = activeColIndex < solution.length;
+        const paddedGuess = currentGuess.padEnd(solution!.word.length, " ");
+        const isLetterEditable = activeColIndex < solution!.word.length;
 
         if (isLetterEditable) {
           const updated =
@@ -134,12 +149,16 @@ export default function Sumot(props: SumotProps) {
             paddedGuess.slice(activeColIndex + 1);
 
           setCurrentGuess(updated);
-          setActiveColIndex((prev) => Math.min(prev + 1, solution.length - 1));
+          setActiveColIndex((prev) =>
+            Math.min(prev + 1, solution!.word.length - 1)
+          );
         }
       } else if (e.key === "ArrowLeft") {
         setActiveColIndex((prev) => Math.max(prev - 1, 0));
       } else if (e.key === "ArrowRight") {
-        setActiveColIndex((prev) => Math.min(prev + 1, solution.length - 1));
+        setActiveColIndex((prev) =>
+          Math.min(prev + 1, solution!.word.length - 1)
+        );
       }
     };
 
@@ -155,22 +174,44 @@ export default function Sumot(props: SumotProps) {
     activeColIndex,
   ]);
 
+  const date = new Date();
+  const formatted = new Intl.DateTimeFormat("fr-FR", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  }).format(date);
+  const capitalizedFrenchDate = formatted
+    .split(" ")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+
+  console.log("Sumot", solution?.id, "Date:", solution?.day);
+
   if (status === GameStates.LOADING) {
     return (
-      <div className="flex justify-center items-center h-screen text-white">
-        Chargement du jeu...
-      </div>
+      <>
+        <h1 className="text-xl font-semibold mb-4 text-center">
+          {capitalizedFrenchDate}
+        </h1>
+        <div className="flex justify-center items-center h-screen text-white">
+          Chargement du jeu...
+        </div>
+      </>
     );
   }
 
   return (
     <div className="flex flex-col items-center">
+      <h1 className="text-xl font-semibold mb-4 text-center">
+        {capitalizedFrenchDate}
+      </h1>
       <div className="flex gap-8 items-start">
-        {solution !== "" && (
+        {solution && (
           <Grid
             guesses={guesses}
             currentGuess={currentGuess}
-            wordLength={solution.length}
+            wordLength={solution?.word.length}
             maxAttempts={MAX_ATTEMPTS}
             gamestate={status}
             letterAnimationDelay={FLIP_DELAY_BETWEEN_LETTERS}

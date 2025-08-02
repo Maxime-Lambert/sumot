@@ -2,13 +2,13 @@ import type { GuessesStateSummary } from "../types/GuessesStateSummary";
 import type { Guess } from "../types/Guess";
 import { LetterStates } from "../types/enums/LetterStateEnum";
 import {
-  KeyboardType,
-  type KeyboardTypeEnum,
+  SmartKeyboardType,
+  type SmartKeyboardTypeEnum,
 } from "../types/enums/KeyboardTypeEnum";
 
 export function analyzeGuesses(
   guesses: Guess[],
-  keyboardType: KeyboardTypeEnum
+  keyboardType: SmartKeyboardTypeEnum
 ): GuessesStateSummary {
   const missing = new Set<string>();
   const correct = new Map<number, string>();
@@ -27,7 +27,7 @@ export function analyzeGuesses(
               i !== col &&
               guess.word[i] === letter &&
               (guess.result[i] === LetterStates.PRESENT ||
-                (keyboardType === KeyboardType.SIMPLE &&
+                (keyboardType === SmartKeyboardType.SIMPLE &&
                   guess.result[i] === LetterStates.CORRECT))
             ) {
               isAlsoPresent = true;

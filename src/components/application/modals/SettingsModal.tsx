@@ -1,3 +1,4 @@
+import { X } from "lucide-react";
 import {
   ColorBlindMode,
   type ColorBlindModeEnum,
@@ -7,8 +8,8 @@ import {
   type KeyboardLayoutsEnum,
 } from "../../../types/enums/KeyboardLayoutsEnum";
 import {
-  KeyboardType,
-  type KeyboardTypeEnum,
+  SmartKeyboardType,
+  type SmartKeyboardTypeEnum,
 } from "../../../types/enums/KeyboardTypeEnum";
 
 type SettingsModalProps = {
@@ -18,8 +19,8 @@ type SettingsModalProps = {
   onLayoutChange: (layout: KeyboardLayoutsEnum) => void;
   colorblindMode: ColorBlindModeEnum;
   onColorBlindChange: (mode: ColorBlindModeEnum) => void;
-  keyboardType: KeyboardTypeEnum;
-  onKeyboardTypeChange: (mode: KeyboardTypeEnum) => void;
+  keyboardType: SmartKeyboardTypeEnum;
+  onKeyboardTypeChange: (mode: SmartKeyboardTypeEnum) => void;
 };
 
 export default function SettingsModal(props: SettingsModalProps) {
@@ -30,12 +31,32 @@ export default function SettingsModal(props: SettingsModalProps) {
       <div className="bg-surface border border-accent rounded-xl shadow-xl w-full max-w-md p-6 relative">
         <button
           onClick={props.onClose}
-          className="absolute top-3 right-3 text-white text-sm border border-accent px-2 py-1 rounded hover:bg-white/10 transition"
+          className="absolute top-3 right-3 text-white text-sm px-2 py-1 rounded hover:bg-white/10 transition"
         >
-          ✕
+          <X />
         </button>
 
         <h2 className="text-xl font-bold text-white mb-4">Paramètres</h2>
+
+        <div className="mb-4">
+          <label className="block text-white mb-1">Mode daltonien</label>
+          <select
+            value={props.colorblindMode}
+            onChange={(e) =>
+              props.onColorBlindChange(e.target.value as ColorBlindModeEnum)
+            }
+            className="w-full p-2 rounded bg-surface border border-accent text-white"
+          >
+            {Object.keys(ColorBlindMode).map((key) => (
+              <option
+                key={key}
+                value={ColorBlindMode[key as keyof typeof ColorBlindMode]}
+              >
+                {ColorBlindMode[key as keyof typeof ColorBlindMode]}
+              </option>
+            ))}
+          </select>
+        </div>
 
         <div className="mb-4">
           <label className="block text-white mb-1">
@@ -60,40 +81,22 @@ export default function SettingsModal(props: SettingsModalProps) {
         </div>
 
         <div className="mb-4">
-          <label className="block text-white mb-1">Mode daltonien</label>
-          <select
-            value={props.colorblindMode}
-            onChange={(e) =>
-              props.onColorBlindChange(e.target.value as ColorBlindModeEnum)
-            }
-            className="w-full p-2 rounded bg-surface border border-accent text-white"
-          >
-            {Object.keys(ColorBlindMode).map((key) => (
-              <option
-                key={key}
-                value={ColorBlindMode[key as keyof typeof ColorBlindMode]}
-              >
-                {ColorBlindMode[key as keyof typeof ColorBlindMode]}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="mb-4">
           <label className="block text-white mb-1">Type de clavier</label>
           <select
             value={props.keyboardType}
             onChange={(e) =>
-              props.onKeyboardTypeChange(e.target.value as KeyboardTypeEnum)
+              props.onKeyboardTypeChange(
+                e.target.value as SmartKeyboardTypeEnum
+              )
             }
             className="w-full p-2 rounded bg-surface border border-accent text-white"
           >
-            {Object.keys(KeyboardType).map((key) => (
+            {Object.keys(SmartKeyboardType).map((key) => (
               <option
                 key={key}
-                value={KeyboardType[key as keyof typeof KeyboardType]}
+                value={SmartKeyboardType[key as keyof typeof SmartKeyboardType]}
               >
-                {KeyboardType[key as keyof typeof KeyboardType]}
+                {SmartKeyboardType[key as keyof typeof SmartKeyboardType]}
               </option>
             ))}
           </select>

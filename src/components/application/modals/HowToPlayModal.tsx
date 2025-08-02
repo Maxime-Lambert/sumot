@@ -3,6 +3,7 @@ import {
   ColorBlindMode,
   type ColorBlindModeEnum,
 } from "../../../types/enums/ColorBlindModeEnum";
+import { X } from "lucide-react";
 
 interface HowToPlayModalProps {
   isOpen: boolean;
@@ -16,13 +17,13 @@ export default function HowToPlayModal(props: HowToPlayModalProps) {
     <>
       {props.isOpen && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-40">
-          <div className="bg-surface text-white p-6 rounded-2xl shadow-xl max-w-2xl w-full relative">
+          <div className="bg-surface text-white p-6 rounded-2xl shadow-xl max-w-2xl w-full relative border border-accent">
             <button
               onClick={() => props.onClose()}
-              className="absolute top-3 right-3 text-white text-base border border-accent rounded-full px-2 hover:bg-white/10 transition"
+              className="absolute top-3 right-3 text-white text-2xl px-2 hover:bg-white/10 transition"
               aria-label="Fermer"
             >
-              ×
+              <X />
             </button>
 
             <h2 className="text-2xl font-bold mb-4 text-center">
@@ -41,9 +42,7 @@ export default function HowToPlayModal(props: HowToPlayModalProps) {
                   Entrez un mot en 5 lettres avec votre clavier ou le clavier
                   virtuel.
                 </li>
-                <li>
-                  Appuyez sur <strong>Entrée</strong> pour valider votre mot.
-                </li>
+                <li>Appuyez sur Entrée pour valider votre mot.</li>
                 <li>
                   Les couleurs vous indiquent si une lettre est correcte ou non
                   :
@@ -76,6 +75,13 @@ export default function HowToPlayModal(props: HowToPlayModalProps) {
                   <span className="text-sm mt-2 text-center">Mal placée</span>
                 </div>
               </div>
+            </div>
+            <h2 className="text-2xl font-bold mt-4 mb-4 text-center">Astuce</h2>
+            <div className="text-justify space-y-4">
+              <p>
+                Il est possible de déplacer la boîte active en cliquant sur une
+                colonne ou bien avec les flèches gauches et droites du clavier.
+              </p>
             </div>
           </div>
         </div>

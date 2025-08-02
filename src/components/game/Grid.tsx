@@ -6,6 +6,7 @@ import {
 import type { Guess } from "../../types/Guess";
 import { LetterStates } from "../../types/enums/LetterStateEnum";
 import type { ColorBlindModeEnum } from "../../types/enums/ColorBlindModeEnum";
+import clsx from "clsx";
 
 type GridProps = {
   guesses: Guess[];
@@ -39,9 +40,7 @@ export default function Grid(props: GridProps) {
 
   for (let rowIndex = 0; rowIndex < props.maxAttempts; rowIndex++) {
     const isPastRow = rowIndex < props.guesses.length;
-    const isCurrentRow =
-      props.gamestate === GameStates.PLAYING &&
-      rowIndex === props.guesses.length;
+    const isCurrentRow = rowIndex === props.guesses.length;
 
     const cells = [];
     if (isPastRow) {
@@ -73,13 +72,16 @@ export default function Grid(props: GridProps) {
           <LetterCell
             key={`${rowIndex}-${col}-${props.gamestate}`}
             letter={
-              char === " "
+              char === " " && props.gamestate === GameStates.PLAYING
                 ? getCorrectLetterOrEmpty(props.guesses, rowIndex, col)
                 : char
             }
             status={LetterStates.NONE}
-            preview={char === " "}
-            isActive={col === props.activeColIndex}
+            preview={char === " " && props.gamestate === GameStates.PLAYING}
+            isActive={
+              col === props.activeColIndex &&
+              props.gamestate === GameStates.PLAYING
+            }
             willFlip={false}
             delay={props.letterAnimationDelay * col}
             animationTime={props.letterAnimationTime}
@@ -110,7 +112,15 @@ export default function Grid(props: GridProps) {
     }
 
     rows.push(
-      <div key={rowIndex} className="flex gap-2 w-full max-w-xs mx-auto">
+      <div
+        key={rowIndex}
+        className={clsx(
+          "flex gap-2 w-full max-w-xs mx-auto",
+          isCurrentRow && props.gamestate === GameStates.INVALID_GUESS
+            ? "animate-shake bg-wrong/30"
+            : ""
+        )}
+      >
         {cells}
       </div>
     );
