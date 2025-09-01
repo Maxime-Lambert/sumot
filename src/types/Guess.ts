@@ -1,6 +1,6 @@
 import type { LetterStateEnum } from "./enums/LetterStateEnum";
 
-export type Guess = {
+export interface Guess {
   word: string;
   result: LetterStateEnum[];
-};
+}

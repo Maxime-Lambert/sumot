@@ -26,3 +26,64 @@ body {
 .rotate-x-180 {
   transform: rotateX(180deg);
 }
+
+@layer base {
+  :root {
+    --background: 0 0% 6%;
+    --background-foreground: 0 0% 100%;
+
+    --primary: 130 40% 50%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 225 8% 30%;
+    --secondary-foreground: 0 0% 100%;
+    --secondary-border: 225 10% 85%;
+
+    --error: 0 65% 45%;
+    --error-foreground: 0 0% 100%;
+
+    --primary-container: 0 0% 12%;
+    --primary-container-foreground: 0 0% 100%;
+    --primary-container-muted: 225 8% 55%;
+    --primary-container-border: 230 10% 20%;
+    --primary-container-error: 0 65% 45%;
+
+    --secondary-container: 220 2.8% 21%;
+    --secondary-container-foreground: 0 0% 100%;
+    --secondary-container-muted: 225 8% 55%;
+    --secondary-container-border: 220 1.4% 42.5%;
+
+    --cell-background-default: 0 0% 33.3%;
+    --cell-foreground-default: 0 0% 100%;
+    --cell-background-preview: 0 0% 33.3%;
+    --cell-foreground-preview: 225 8% 55%;
+    --cell-background-missing: 0 0% 12%;
+    --cell-foreground-missing: 225 8% 55%;
+    --cell-background-correct: 130 40% 50%;
+    --cell-foreground-correct: 0 0% 100%;
+    --cell-background-almost: 50 70% 50%;
+    --cell-foreground-almost: 0 0% 100%;
+    --cell-border-default: 0 0% 33.3%;
+    --cell-border-error: 0 65% 45%;
+    --cell-border-select: 200 70% 50%;
+  }
+
+  .dark-colorblind {
+    --primary: 210 60% 40%;
+    --error: 10 40% 40%;
+    --primary-container-error: 10 40% 40%;
+    --cell-background-correct: 210 60% 40%;
+    --cell-background-almost: 30 90% 70%;
+    --cell-border-error: 10 40% 40%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-cell-border-default;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
