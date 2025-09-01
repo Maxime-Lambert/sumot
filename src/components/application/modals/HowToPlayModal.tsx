@@ -24,15 +24,15 @@ export default function HowToPlayModal({
 
         <div className="space-y-4 text-sm text-justify">
           <p>
-            Chaque jour, il faut trouver un mot du dictionnaire français en 5
+            Chaque jour, il faut trouver un mot du lexique français en 5 ou 6
             lettres.
           </p>
           <p>Le jeu suit les règles du Motus :</p>
 
           <ul className="list-disc list-inside space-y-1">
             <li>
-              Entrez un mot en 5 lettres avec votre clavier ou le clavier
-              virtuel.
+              Entrez un mot en 5 ou 6 lettres avec votre clavier ou le clavier
+              virtuel. Le mot doit faire partie de notre lexique français.
             </li>
             <li>Appuyez sur Entrée pour valider votre mot.</li>
             <li>
@@ -57,7 +57,7 @@ export default function HowToPlayModal({
 
           <DialogTitle className="text-center">Astuce</DialogTitle>
           <p>
-            Il est possible de déplacer la boîte active en cliquant sur une
+            Il est possible de déplacer la case active en cliquant sur une
             colonne ou bien avec les flèches gauches et droites du clavier.
           </p>
 

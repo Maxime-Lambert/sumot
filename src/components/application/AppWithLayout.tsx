@@ -43,7 +43,7 @@ export default function AppWithLayout() {
     let id: ReturnType<typeof setInterval>;
 
     async function init() {
-      const user = await getUser(userId);
+      const user = await getUser();
       setColorblindMode(user.colorblindMode);
       setKeyboardLayout(user.keyboardLayout);
       setKeyboardType(user.smartKeyboardType);

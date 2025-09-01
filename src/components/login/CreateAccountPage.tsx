@@ -7,7 +7,6 @@ import PrivacyPolicyModal from "@/components/application/modals/PrivacyPolicyMod
 import type { CreateUserRequest } from "@/api/users/createUser/CreateUserRequest";
 import { Link, useNavigate } from "react-router-dom";
 import { showToast } from "@/services/ToastService";
-import { AxiosError } from "axios";
 import {
   Tooltip,
   TooltipContent,
@@ -84,25 +83,12 @@ export default function CreateAccountPage() {
         ...(form.email && { email: form.email }),
       };
 
-      const response = await createUser(createUserRequest);
+      await createUser(createUserRequest);
 
-      if (response.status === 201) {
-        if (form.email) {
-          navigate("/signup", { state: { email: form.email } });
-        } else {
-          navigate("/login");
-        }
-        return;
-      }
-    } catch (err: unknown) {
-      if (err instanceof AxiosError && err.response) {
-        const { status, data } = err.response;
-
-        if (status === 400) {
-          showToast(data.detail || "Requête invalide.", "error");
-        }
+      if (form.email) {
+        navigate("/signup", { state: { email: form.email } });
       } else {
-        showToast("Erreur inconnue", "error");
+        navigate("/login");
       }
     } finally {
       setLoading(false);

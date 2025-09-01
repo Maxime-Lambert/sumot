@@ -30,6 +30,13 @@ export function SumotHistory() {
     Record<string, PlayerHistory>
   >({});
 
+  const formatLocalDate = (d: Date) => {
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
   useEffect(() => {
     async function load() {
       const local = await getItem("sumots:all");
@@ -53,14 +60,19 @@ export function SumotHistory() {
       currentMonth.getMonth(),
       1
     );
-    const endOfMonth = new Date(
+    const totalDays = new Date(
       currentMonth.getFullYear(),
       currentMonth.getMonth() + 1,
       0
+    ).getDate();
+    const endOfMonth = new Date(
+      currentMonth.getFullYear(),
+      currentMonth.getMonth(),
+      totalDays
     );
 
-    const minDate = startOfMonth.toISOString().split("T")[0];
-    const maxDate = endOfMonth.toISOString().split("T")[0];
+    const minDate = formatLocalDate(startOfMonth);
+    const maxDate = formatLocalDate(endOfMonth);
 
     const token = localStorage.getItem("access_token");
     if (token) {

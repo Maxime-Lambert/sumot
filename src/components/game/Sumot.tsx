@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import GameResultPanel from "@/components/game/GameResultPanel";
 import GameScorePanel from "@/components/game/GameScorePanel";
 import GameResultModal from "@/components/game/GameResultModal";
@@ -23,8 +23,8 @@ import Keyboard from "./Keyboard";
 import { Button } from "../ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
-function getRandomInRange(min: number, max: number) {
-  return Math.random() * (max - min) + min;
+function getRandomInRange(max: number) {
+  return Math.floor(Math.random() * max);
 }
 
 export default function Sumot() {
@@ -42,25 +42,32 @@ export default function Sumot() {
   const [searchParams] = useSearchParams();
   const [sumots, setSumots] = useState<Sumot[]>([]);
   const [showResultModal, setShowResultModal] = useState<boolean>(false);
-  const { playsWithDifficultWords } = useSettingsStore();
+  const [hasTyped, setHasTyped] = useState(false);
+  const { playsWithDifficultWords, keyboardLayout } = useSettingsStore();
   const navigate = useNavigate();
   const infiniteParam = searchParams.has("infinite");
   const dayParam = searchParams.get("day");
 
-  const isValidDateParam = (param: string): boolean => {
-    const regex = /^\d{4}-\d{2}-\d{2}$/; // format YYYY-MM-DD
-    if (!regex.test(param)) return false;
+  const isValidDateParam = (param: string) =>
+    /^\d{4}-\d{2}-\d{2}$/.test(param) && !isNaN(Date.parse(param));
 
-    const d = new Date(param);
-    return !isNaN(d.getTime()) && d.toISOString().slice(0, 10) === param;
-  };
+  const orderedSumots = useMemo(
+    () =>
+      sumots.filter((s) => s.day).sort((a, b) => (a.day! < b.day! ? 1 : -1)),
+    [sumots]
+  );
 
-  const orderedSumots = sumots
-    .filter((s) => s.day !== null)
-    .sort((a, b) => (a.day! < b.day! ? 1 : -1));
+  function applyGuesses(guesses: Guess[]) {
+    setGuesses(guesses);
+    const lastGuess = guesses.at(-1);
+    if (lastGuess?.word === solution?.word) setStatus(GameStates.WON);
+    else if (guesses.length >= maxAttempts) setStatus(GameStates.LOST);
+    else setStatus(GameStates.PLAYING);
+  }
 
   useEffect(() => {
     async function load() {
+      setStatus(GameStates.LOADING);
       const local = await getItem("sumots:all");
       const loaded = local
         ? await updateSumotsFromDate()
@@ -77,10 +84,10 @@ export default function Sumot() {
         );
       } else if (infiniteParam) {
         if (playsWithDifficultWords) {
-          match = loaded.at(getRandomInRange(0, loaded.length));
+          match = loaded.at(getRandomInRange(loaded.length));
         } else {
           const normalWords = loaded.filter((l) => !l.isDifficult);
-          match = normalWords.at(getRandomInRange(0, normalWords.length));
+          match = normalWords.at(getRandomInRange(normalWords.length));
         }
       } else {
         const today = new Date().toISOString().split("T")[0];
@@ -96,12 +103,15 @@ export default function Sumot() {
     }
 
     void load();
-  }, [searchParams, setSolution]);
+  }, [dayParam, infiniteParam]);
 
   useEffect(() => {
     if (!solution) return;
     reset(solution);
-    if (infiniteParam) return;
+    if (infiniteParam) {
+      setStatus(GameStates.PLAYING);
+      return;
+    }
     const token = localStorage.getItem("access_token");
     if (token) {
       const fetch = async () => {
@@ -120,15 +130,9 @@ export default function Sumot() {
             };
           });
 
-          setGuesses(guesses);
-          const lastGuess = guesses.at(-1);
-          if (lastGuess?.word === solution.word) {
-            setStatus(GameStates.WON);
-          } else if (guesses.length >= maxAttempts) {
-            setStatus(GameStates.LOST);
-          } else {
-            setStatus(GameStates.PLAYING);
-          }
+          applyGuesses(guesses);
+        } else {
+          setStatus(GameStates.PLAYING);
         }
       };
       void fetch();
@@ -140,16 +144,9 @@ export default function Sumot() {
           result: evaluateGuess(word, solution.word),
         }));
 
-        setGuesses(loadedGuesses);
-
-        const lastGuess = loadedGuesses.at(-1);
-        if (lastGuess?.word === solution.word) {
-          setStatus(GameStates.WON);
-        } else if (loadedGuesses.length >= maxAttempts) {
-          setStatus(GameStates.LOST);
-        } else {
-          setStatus(GameStates.PLAYING);
-        }
+        applyGuesses(loadedGuesses);
+      } else {
+        setStatus(GameStates.PLAYING);
       }
     }
   }, [solution, reset, setGuesses, setStatus, maxAttempts]);
@@ -164,6 +161,12 @@ export default function Sumot() {
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [inputKey, sumots]);
+
+  useEffect(() => {
+    if (status === GameStates.REVEALING) {
+      setHasTyped(true);
+    }
+  }, [status]);
 
   const isGameOver = (
     [GameStates.WON, GameStates.LOST] as GameStatesEnum[]
@@ -204,13 +207,14 @@ export default function Sumot() {
   };
 
   return (
-    <div className="flex flex-col h-full w-full">
-      <div className="flex items-center justify-center flex-[0.5] mb-4 sm:mb-6 gap-4">
+    <div className="grid grid-rows-[auto_1fr_auto] h-full w-full">
+      <div className="flex items-center justify-center gap-4 py-2">
         {orderedSumots[currentIndex + 1] !== undefined && !infiniteParam ? (
           <Button
             variant="outline"
             size="icon"
             onClick={() => handleNavigate(true)}
+            aria-label="Jour précédent"
           >
             <ChevronLeft className="h-4 w-4" />
           </Button>
@@ -218,13 +222,16 @@ export default function Sumot() {
           <div className="w-9 h-9" />
         )}
 
-        <h3 className="text-lg font-semibold">{capitalizedFrenchDate}</h3>
+        <h3 className="text-base sm:text-lg font-semibold max-w-[60%] sm:max-w-none">
+          {capitalizedFrenchDate}
+        </h3>
 
         {orderedSumots[currentIndex - 1] !== undefined && !infiniteParam ? (
           <Button
             variant="outline"
             size="icon"
             onClick={() => handleNavigate(false)}
+            aria-label="Jour suivant"
           >
             <ChevronRight className="h-4 w-4" />
           </Button>
@@ -233,35 +240,46 @@ export default function Sumot() {
         )}
       </div>
 
-      <div className="flex-[8] flex flex-col sm:flex-row gap-4 w-full justify-center items-stretch">
-        {isGameOver ? (
-          <>
-            <div className="w-full sm:w-[360px]">
-              <GameScorePanel guesses={guesses} sumot={solution} />
+      {isGameOver ? (
+        <div className="flex flex-row items-center justify-center gap-4 w-full">
+          <div className="sm:w-[360px]">
+            <GameScorePanel guesses={guesses} sumot={solution} />
+          </div>
+          {!isSmallScreen && (
+            <div className="sm:w-[360px]">
+              <GameResultPanel solution={solution} status={status} />
             </div>
-            {!isSmallScreen && (
-              <div className="w-full sm:w-[360px]">
-                <GameResultPanel solution={solution} status={status} />
-              </div>
-            )}
-          </>
-        ) : (
-          <div className="flex flex-col flex-1 w-full max-w-[500px] mx-auto gap-2 mt-2">
-            <div className="flex-[8] flex items-center justify-center overflow-hidden">
+          )}
+        </div>
+      ) : (
+        <div className="flex flex-col items-center justify-center gap-4 w-full">
+          <p className="text-sm text-primary-container-foreground italic">
+            {hasTyped
+              ? ""
+              : "Tapes un mot puis valide avec Entrée pour commencer à jouer."}
+          </p>
+
+          <div className="flex flex-col flex-1 w-[80%] max-w-[500px] mx-auto gap-2">
+            <div className="flex items-center justify-center overflow-hidden">
               <Grid />
             </div>
-
-            <div className="flex-[2] flex justify-center items-center w-full">
-              <Keyboard sumots={sumots} />
-            </div>
           </div>
+        </div>
+      )}
+
+      <div className="flex justify-center items-center py-2">
+        {!isGameOver && keyboardLayout !== "Hidden" ? (
+          <div className="w-full max-w-[650px]">
+            <Keyboard sumots={sumots} />
+          </div>
+        ) : (
+          <div className="h-[120px]" />
         )}
       </div>
+
       <GameResultModal
         open={showResultModal}
-        onClose={() => {
-          setShowResultModal(false);
-        }}
+        onClose={() => setShowResultModal(false)}
         status={status}
         solution={solution}
       />

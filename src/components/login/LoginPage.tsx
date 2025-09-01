@@ -40,14 +40,11 @@ export const LoginPage = () => {
         const userId = getUserIdFromToken(token!);
         await flushBufferedHistoriesIfAny();
         setUserId(userId!);
-        await patchUser(
-          {
-            colorblindmode: ColorBlindModeApiMap[colorblindMode],
-            keyboardlayout: KeyboardLayoutsApiMap[keyboardLayout],
-            smartkeyboardtype: SmartKeyboardTypeApiMap[keyboardType],
-          },
-          userId!
-        );
+        await patchUser({
+          colorblindmode: ColorBlindModeApiMap[colorblindMode],
+          keyboardlayout: KeyboardLayoutsApiMap[keyboardLayout],
+          smartkeyboardtype: SmartKeyboardTypeApiMap[keyboardType],
+        });
         navigate("/");
       }
     } finally {

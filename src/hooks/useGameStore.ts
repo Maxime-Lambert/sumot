@@ -43,7 +43,6 @@ export const useGameStore = create<GameState>((set, get) => ({
       guesses: [],
       currentGuess: "",
       activeColIndex: 0,
-      status: GameStates.PLAYING,
       solution,
     }),
 

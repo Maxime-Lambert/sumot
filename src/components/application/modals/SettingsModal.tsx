@@ -58,13 +58,13 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
   ) {
     storeSetter(value);
     if (!userId) return;
-    await patchUser({ [apiField]: map[value] }, userId);
+    await patchUser({ [apiField]: map[value] });
   }
 
   async function updateDifficulty(value: boolean) {
     setPlaysWithDifficultWords(value);
     if (!userId) return;
-    await patchUser({ playsWithDifficultWords: value }, userId);
+    await patchUser({ playsWithDifficultWords: value });
   }
 
   return (

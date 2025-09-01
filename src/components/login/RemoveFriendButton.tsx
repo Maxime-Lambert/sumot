@@ -39,9 +39,9 @@ export function RemoveFriendButton({
           className="flex items-center gap-1 p-2 rounded-md bg-success text-white hover:opacity-90"
         >
           {icon === "trash" ? (
-            <Trash2 size={16} color="#bd2828" />
+            <Trash2 className="w-4 h-4 text-error" />
           ) : (
-            <XCircle size={16} color="#bd2828" />
+            <XCircle className="w-4 h-4 text-error" />
           )}
           <span className="text-sm sm:hidden">Supprimer</span>
         </button>

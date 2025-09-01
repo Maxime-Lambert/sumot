@@ -54,7 +54,7 @@ export default function FriendCardGrid({
                 onClick={async () => await onRemove?.(f)}
                 className="flex items-center gap-1 p-2 rounded-md bg-success text-white hover:opacity-90"
               >
-                <XCircle size={16} color="#bd2828" />
+                <XCircle className="w-4 h-4 text-error" />
                 <span className="text-sm sm:hidden">Annuler</span>
               </button>
             )}
@@ -64,14 +64,14 @@ export default function FriendCardGrid({
                   onClick={async () => await onAccept?.(f)}
                   className="flex items-center gap-1 p-2 rounded-md bg-success text-white hover:opacity-90"
                 >
-                  <CheckCircle2 size={16} color="#4db35d" />
+                  <CheckCircle2 className="w-4 h-4 text-primary" />
                   <span className="text-sm sm:hidden">Accepter</span>
                 </button>
                 <button
                   onClick={async () => await onRemove?.(f)}
                   className="flex items-center gap-1 p-2 rounded-md bg-success text-white hover:opacity-90"
                 >
-                  <XCircle size={16} color="#bd2828" />
+                  <XCircle className="w-4 h-4 text-error" />
                   <span className="text-sm sm:hidden">Refuser</span>
                 </button>
               </>
