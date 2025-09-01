@@ -47,6 +47,18 @@ export default function Sumot() {
   const infiniteParam = searchParams.has("infinite");
   const dayParam = searchParams.get("day");
 
+  const isValidDateParam = (param: string): boolean => {
+    const regex = /^\d{4}-\d{2}-\d{2}$/; // format YYYY-MM-DD
+    if (!regex.test(param)) return false;
+
+    const d = new Date(param);
+    return !isNaN(d.getTime()) && d.toISOString().slice(0, 10) === param;
+  };
+
+  const orderedSumots = sumots
+    .filter((s) => s.day !== null)
+    .sort((a, b) => (a.day! < b.day! ? 1 : -1));
+
   useEffect(() => {
     async function load() {
       const local = await getItem("sumots:all");
@@ -57,6 +69,9 @@ export default function Sumot() {
       let match: Sumot | undefined;
 
       if (dayParam) {
+        if (!isValidDateParam(dayParam)) {
+          navigate("/404", { replace: true });
+        }
         match = loaded.find(
           (s) => s.day?.toLowerCase() === dayParam.toLowerCase()
         );
@@ -75,6 +90,8 @@ export default function Sumot() {
       if (match) {
         setSumots(loaded);
         setSolution(match);
+      } else {
+        navigate("/404", { replace: true });
       }
     }
 
@@ -177,8 +194,8 @@ export default function Sumot() {
     return <LoadingScreen />;
   }
 
-  const orderedSumots = sumots.sort((a, b) => (a.day! < b.day! ? 1 : -1));
   const currentIndex = orderedSumots.findIndex((s) => s.day === solution.day);
+  console.log({ currentIndex, orderedSumots, solution });
   const handleNavigate = (before: boolean) => {
     if (before) {
       navigate(`/?day=${orderedSumots[currentIndex + 1]?.day}`);
