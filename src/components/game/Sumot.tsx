@@ -195,7 +195,6 @@ export default function Sumot() {
   }
 
   const currentIndex = orderedSumots.findIndex((s) => s.day === solution.day);
-  console.log({ currentIndex, orderedSumots, solution });
   const handleNavigate = (before: boolean) => {
     if (before) {
       navigate(`/?day=${orderedSumots[currentIndex + 1]?.day}`);
