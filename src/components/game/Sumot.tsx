@@ -207,7 +207,7 @@ export default function Sumot() {
   return (
     <div className="flex flex-col h-full w-full">
       <div className="flex items-center justify-center flex-[0.5] mb-4 sm:mb-6 gap-4">
-        {orderedSumots[currentIndex + 1] !== undefined ? (
+        {orderedSumots[currentIndex + 1] !== undefined && !infiniteParam ? (
           <Button
             variant="outline"
             size="icon"
@@ -221,7 +221,7 @@ export default function Sumot() {
 
         <h3 className="text-lg font-semibold">{capitalizedFrenchDate}</h3>
 
-        {orderedSumots[currentIndex - 1] !== undefined ? (
+        {orderedSumots[currentIndex - 1] !== undefined && !infiniteParam ? (
           <Button
             variant="outline"
             size="icon"
