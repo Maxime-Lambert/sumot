@@ -43,7 +43,6 @@ export default function AccountPage() {
     keyboardlayout: KeyboardLayoutsApiMap[KeyboardLayouts.AZERTY],
     smartkeyboardtype: SmartKeyboardTypeApiMap[SmartKeyboardType.None],
   });
-  const [userId, setUserId] = useState("");
   const [userEmail, setUserEmail] = useState("");
   const [openDelete, setOpenDelete] = useState(false);
   const [editMode, setEditMode] = useState(false);
@@ -61,9 +60,7 @@ export default function AccountPage() {
         navigate("/login");
         return;
       }
-
-      setUserId(userId);
-      const user = await getUser(userId);
+      const user = await getUser();
       setUser({
         username: user.userName,
         email: user.email,
@@ -95,7 +92,7 @@ export default function AccountPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await patchUser(user, userId);
+    await patchUser(user);
     setEditMode(false);
     showToast("Modifications enregistrées.", "success");
   };

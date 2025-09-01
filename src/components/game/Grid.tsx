@@ -69,7 +69,10 @@ export default function Grid() {
             letter={letter}
             letterState={LetterStates.NONE}
             isActive={col === activeColIndex && status === GameStates.PLAYING}
-            error={status === GameStates.INVALID_GUESS}
+            error={
+              status === GameStates.INVALID_GUESS &&
+              (char === " " || currentGuess.indexOf(" ") === -1)
+            }
             preview={char === " "}
             column={col}
           />
@@ -91,7 +94,7 @@ export default function Grid() {
 
   return (
     <div
-      className="grid w-full h-full gap-[0.4rem] p-2 sm:p-4"
+      className="grid w-full h-full gap-1 sm:gap-2 p-1 sm:p-2 justify-around content-center"
       style={{
         gridTemplateColumns: `repeat(${solution?.word.length}, 1fr)`,
         gridTemplateRows: `repeat(${maxAttempts}, 1fr)`,

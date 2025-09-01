@@ -24,6 +24,7 @@ const LAYOUTS: Record<KeyboardLayoutsEnum, string[][]> = {
     "A S D F G H J K L".split(" "),
     ["Enter", ..."Y X C V B N M".split(" "), "Backspace"],
   ],
+  Hidden: [],
 };
 
 interface KeyboardProps {
@@ -133,14 +134,20 @@ export default function Keyboard({ sumots }: KeyboardProps) {
                 onClick={(e) => handleClick(key, e)}
                 className={clsx(
                   getClassName(key),
-                  "flex items-center justify-center rounded border font-bold text-lg sm:text-xl select-none transition-colors duration-150 ease-in-out",
+                  "flex flex-col items-center justify-center rounded border font-bold text-lg sm:text-xl select-none transition-colors duration-150 ease-in-out",
                   "py-1 sm:py-3"
                 )}
               >
                 {key === "Backspace" ? (
-                  <Delete className="w-5 h-5 sm:w-6 sm:h-6" />
+                  <>
+                    <Delete className="w-5 h-5 sm:w-6 sm:h-6" />
+                    <p className="text-xs">Suppr</p>
+                  </>
                 ) : key === "Enter" ? (
-                  <CornerDownLeft className="w-5 h-5 sm:w-6 sm:h-6" />
+                  <>
+                    <CornerDownLeft className="w-5 h-5 sm:w-6 sm:h-6" />
+                    <p className="text-xs">Entrée</p>
+                  </>
                 ) : (
                   key
                 )}

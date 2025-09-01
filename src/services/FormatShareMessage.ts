@@ -24,11 +24,11 @@ export const formatShareMessage = (
   day: string
 ) => {
   const statusesGrid = tries.map((guess) => {
-    return guess.result.map((s) => statusToEmoji[s]).join(" ");
+    return guess.result.map((s) => statusToEmoji[s]).join("");
   });
   const missingTries = 6 - tries.length;
   if (missingTries > 0) {
-    const emptyLine = Array(solution.length).fill("⬛").join(" ");
+    const emptyLine = Array(solution.length).fill("⬛").join("");
     for (let i = 0; i < missingTries; i++) {
       statusesGrid.push(emptyLine);
     }
@@ -46,6 +46,6 @@ export const formatShareMessage = (
     : `😢 Sumot du ${dayFr} pas trouvé…`;
 
   return `${messageHeader}\n\n${statusesGrid.join(
-    "\n\n"
+    ""
   )}\n\nViens jouer 👉 https://www.sumot.app ou télécharge Sumot sur le Play Store`;
 };

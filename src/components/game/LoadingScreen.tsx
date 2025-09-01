@@ -5,7 +5,7 @@ export default function LoadingScreen() {
     <div className="flex flex-col items-center justify-center h-full w-full gap-4 text-primary-container-foreground">
       <div className="flex items-center gap-2">
         <Loader2 className="w-5 h-5 animate-spin" />
-        <span>Chargement du jeu...</span>
+        <span>Chargement...</span>
       </div>
     </div>
   );

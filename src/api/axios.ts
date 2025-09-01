@@ -96,7 +96,7 @@ instance.interceptors.response.use(
         isRefreshing = false;
       }
     } else {
-      showToast(problem.detail || "Une erreur est survenue", "error");
+      showToast(problem?.detail || "Une erreur est survenue", "error");
     }
 
     return Promise.reject(error);

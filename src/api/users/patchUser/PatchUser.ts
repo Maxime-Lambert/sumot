@@ -2,10 +2,9 @@ import axios from "../../axios";
 import type { PatchUserRequest } from "./PatchUserRequest";
 
 export async function patchUser(
-  patchUserRequest: PatchUserRequest,
-  userId: string
+  patchUserRequest: PatchUserRequest
 ): Promise<void> {
-  await axios.patch(`/users/${userId}`, {
+  await axios.patch(`/users`, {
     UserName: patchUserRequest.username,
     Email: patchUserRequest.email,
     Password: patchUserRequest.password,

@@ -49,7 +49,11 @@ export function LetterCellBase({
         error && "border-cell-border-error animate-shake",
         !isActive && "border-cell-border-default"
       )}
-      onClick={() => setActiveColIndex(column!)}
+      onClick={() => {
+        if (column !== undefined) {
+          setActiveColIndex(column);
+        }
+      }}
     >
       {letter}
     </div>
