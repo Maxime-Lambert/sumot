@@ -1,30 +1,48 @@
+import { useEffect, useRef } from "react";
+import { Link as LinkIcon } from "lucide-react";
 import type { Sumot } from "@/types/Sumot";
-import { Link } from "lucide-react";
 
-type DefinitionPanelProps = {
+interface DefinitionPanelProps {
   solution?: Sumot;
-};
+  onReady?: () => void;
+}
 
-export default function DefinitionPanel(props: DefinitionPanelProps) {
+export default function DefinitionPanel({
+  solution,
+  onReady,
+}: DefinitionPanelProps) {
+  const contentRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!solution || !contentRef.current) return;
+    const links = contentRef.current.querySelectorAll("a");
+    links.forEach((link) => {
+      link.setAttribute("target", "_blank");
+      link.setAttribute("rel", "noopener noreferrer");
+    });
+    onReady?.();
+  }, [solution, onReady]);
+
+  if (!solution) return null;
+
   return (
-    <div className="mt-2 p-3 bg-surface border border-accent rounded text-white max-w-2xl mx-auto text-xs">
-      <h2 className="font-semibold mb-1 text-base flex justify-center items-center gap-1">
+    <div className="w-full p-4 border border-secondary-container-border rounded-xl bg-secondary-container text-sm text-white">
+      <h2 className="font-semibold mb-2 text-center text-base">
         <a
+          href={`https://fr.wiktionary.org/wiki/${solution.definitionWord}`}
           target="_blank"
-          href={`https://fr.wiktionary.org/wiki/${props.solution?.definitionWord}`}
           rel="noopener noreferrer"
           className="underline inline-flex items-center gap-1 hover:text-accent transition"
         >
-          <span>{props.solution?.definitionWord}</span>
-          <Link className="w-3.5 h-3.5" />
+          <span>{solution.definitionWord}</span>
+          <LinkIcon className="w-4 h-4" />
         </a>
       </h2>
 
       <div
-        className="prose prose-invert max-w-none"
-        dangerouslySetInnerHTML={{
-          __html: props.solution ? props.solution.definition : "",
-        }}
+        ref={contentRef}
+        className="prose prose-invert max-w-none text-sm text-left leading-relaxed"
+        dangerouslySetInnerHTML={{ __html: solution.definition }}
       />
     </div>
   );

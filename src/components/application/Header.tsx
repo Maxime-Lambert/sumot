@@ -1,126 +1,135 @@
-import { useState, useRef } from "react";
-import { HelpCircle, Settings, User } from "lucide-react";
+import {
+  Calendar1,
+  HelpCircle,
+  LogOut,
+  Settings,
+  User,
+  Users,
+} from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { DropdownMenu } from "@radix-ui/react-dropdown-menu";
+import ThemedDropdownMenuContent from "../ui/themed/dropdownmenucontent";
+import ThemedDropdownMenuItem from "../ui/themed/dropdownmenuitem";
+import ThemedDropdownMenuTrigger from "../ui/themed/dropdownmenutrigger";
+import { useSettingsStore } from "@/hooks/useSettingStore";
+import { Button } from "../ui/button";
+import { useFriendRequestsStore } from "@/hooks/useFriendRequestsStore";
 
-type HeaderProps = {
+interface HeaderProps {
   onOpenHelp: () => void;
   onOpenSettings: () => void;
-};
+}
 
 export default function Header({ onOpenHelp, onOpenSettings }: HeaderProps) {
   const navigate = useNavigate();
-  const isAuthenticated = !!localStorage.getItem("access_token");
-  const [showMenu, setShowMenu] = useState(false);
-  const closeTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  function handleLogout() {
-    localStorage.removeItem("access_token");
-    localStorage.removeItem("refresh_token");
-    navigate("/");
-  }
-
-  function handleMouseEnter() {
-    if (closeTimeout.current) {
-      clearTimeout(closeTimeout.current);
-      closeTimeout.current = null;
-    }
-    setShowMenu(true);
-  }
-
-  function handleMouseLeave() {
-    closeTimeout.current = setTimeout(() => {
-      setShowMenu(false);
-      closeTimeout.current = null;
-    }, 300);
-  }
+  const { userId } = useSettingsStore();
+  const { receivedCount } = useFriendRequestsStore();
 
   return (
-    <header className="w-full border-b border-accent bg-surface shadow">
-      <div className="max-w-4xl mx-auto flex items-center justify-between px-4 py-3">
-        <div className="w-14" />
+    <header className="w-full h-12 sm:h-16 border-b border-secondary-border bg-secondary text-secondary-foreground backdrop-blur">
+      <div className="max-w-[1280px] mx-auto flex items-center h-full justify-between px-3 sm:px-4">
+        <div className="flex-1 flex justify-start" />
+
         <div className="flex-1 flex justify-center">
-          <button onClick={() => navigate("/")}>
+          <button onClick={() => navigate("/")} className="focus:outline-none">
             <img
               src="/sumot_logo_cropped.png"
               alt="SUMOT Logo"
-              className="h-14 object-contain"
+              className="h-10 sm:h-14 object-contain"
             />
           </button>
         </div>
-        <div className="flex items-center gap-3">
-          <button onClick={onOpenHelp} aria-label="Aide">
-            <HelpCircle
-              size={16}
-              className="w-8 h-8 text-white hover:opacity-90 transition"
-            />
-          </button>
-          <button onClick={onOpenSettings}>
-            <Settings
-              size={16}
-              className="w-8 h-8 text-white hover:opacity-90 transition"
-            />
-          </button>
 
-          {/* Bloc utilisateur avec hover + délai */}
-          <div
-            className="relative"
-            onMouseEnter={handleMouseEnter}
-            onMouseLeave={handleMouseLeave}
+        <div className="flex-1 flex justify-end gap-1 sm:gap-3 items-center">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onOpenHelp}
+            aria-label="Aide"
+            className="w-4 h-4 sm:w-7 sm:h-7 flex items-center justify-center hover:bg-secondary-muted rounded-md transition"
           >
-            <div className="cursor-pointer">
-              <User
-                size={16}
-                className="w-8 h-8 text-white hover:opacity-90 transition"
-              />
-            </div>
+            <HelpCircle className="!w-4 !h-4 sm:!w-7 sm:!h-7" />
+          </Button>
 
-            {showMenu && (
-              <div
-                className="absolute right-0 mt-2 w-48 bg-surface border rounded shadow-lg
-                transition-all duration-150 z-50"
-                onMouseEnter={handleMouseEnter}
-                onMouseLeave={handleMouseLeave}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onOpenSettings}
+            aria-label="Paramètres"
+            className="w-4 h-4 sm:w-7 sm:h-7 flex items-center justify-center hover:bg-secondary-muted rounded-md transition"
+          >
+            <Settings className="!w-4 !h-4 sm:!w-7 sm:!h-7" />
+          </Button>
+
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => navigate("/history")}
+            aria-label="Historique"
+            className="w-4 h-4 sm:w-7 sm:h-7 flex items-center justify-center hover:bg-secondary-muted rounded-md transition"
+          >
+            <Calendar1 className="!w-4 !h-4 sm:!w-7 sm:!h-7" />
+          </Button>
+
+          {userId && (
+            <DropdownMenu>
+              <ThemedDropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="w-4 h-4 sm:w-7 sm:h-7 p-0 items-center justify-center hover:bg-secondary-muted rounded-md transition inline-flex"
+                >
+                  <User className="!w-4 !h-4 sm:!w-7 sm:!h-7" />
+                </Button>
+              </ThemedDropdownMenuTrigger>
+              <ThemedDropdownMenuContent
+                side="bottom"
+                align="end"
+                className="w-56"
               >
-                {isAuthenticated ? (
-                  <>
-                    <button
-                      onClick={() => navigate("/account")}
-                      className="w-full text-left px-4 py-2 hover:bg-primary"
-                    >
-                      Gestion du compte
-                    </button>
-                    <button
-                      onClick={() => navigate("/friends")}
-                      className="w-full text-left px-4 py-2 hover:bg-primary"
-                    >
-                      Amis
-                    </button>
-                    <button
-                      onClick={handleLogout}
-                      className="w-full text-left px-4 py-2 hover:bg-primary"
-                    >
-                      Se déconnecter
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <button
-                      onClick={() => navigate("/login")}
-                      className="w-full text-left px-4 py-2 hover:bg-primary"
-                    >
-                      Se connecter
-                    </button>
-                    <button
-                      onClick={() => navigate("/register")}
-                      className="w-full text-left px-4 py-2 hover:bg-primary"
-                    >
-                      Créer un compte
-                    </button>
-                  </>
-                )}
-              </div>
-            )}
-          </div>
+                <ThemedDropdownMenuItem onClick={() => navigate("/account")}>
+                  <Settings className="mr-2 h-4 w-4" />
+                  Gestion du compte
+                </ThemedDropdownMenuItem>
+                <ThemedDropdownMenuItem
+                  className="bg-primary-container-error/70 hover:bg-primary-container-error focus:bg-primary-container-error"
+                  onClick={() => navigate("/logout")}
+                >
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Se déconnecter
+                </ThemedDropdownMenuItem>
+              </ThemedDropdownMenuContent>
+            </DropdownMenu>
+          )}
+
+          {!userId && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => navigate("/login")}
+              aria-label="Connecter"
+              className="relative w-4 h-4 sm:w-7 sm:h-7 flex items-center justify-center hover:bg-secondary-muted rounded-md transition"
+            >
+              <User className="!w-4 !h-4 sm:!w-7 sm:!h-7" />
+            </Button>
+          )}
+
+          {userId && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => navigate("/friends")}
+              aria-label="Amis"
+              className="relative w-4 h-4 sm:w-7 sm:h-7 flex items-center justify-center hover:bg-secondary-muted rounded-md transition"
+            >
+              <Users className="!w-4 !h-4 sm:!w-7 sm:!h-7" />
+              {receivedCount > 0 && (
+                <span className="absolute -bottom-1 -right-1 text-[10px] sm:text-xs bg-primary text-white rounded-full px-[5px] py-[1px] shadow">
+                  {receivedCount}
+                </span>
+              )}
+            </Button>
+          )}
         </div>
       </div>
     </header>

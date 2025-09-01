@@ -27,7 +27,7 @@ export function analyzeGuesses(
               i !== col &&
               guess.word[i] === letter &&
               (guess.result[i] === LetterStates.PRESENT ||
-                (keyboardType === SmartKeyboardType.SIMPLE &&
+                (keyboardType === SmartKeyboardType.Simple &&
                   guess.result[i] === LetterStates.CORRECT))
             ) {
               isAlsoPresent = true;

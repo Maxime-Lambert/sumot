@@ -1,25 +1,9 @@
-import LetterCell from "./LetterCell";
-import {
-  GameStates,
-  type GameStatesEnum,
-} from "../../types/enums/GameStateEnum";
+import { GameStates } from "../../types/enums/GameStateEnum";
 import type { Guess } from "../../types/Guess";
 import { LetterStates } from "../../types/enums/LetterStateEnum";
-import type { ColorBlindModeEnum } from "../../types/enums/ColorBlindModeEnum";
-import clsx from "clsx";
-
-type GridProps = {
-  guesses: Guess[];
-  currentGuess: string;
-  wordLength: number;
-  maxAttempts: number;
-  activeColIndex: number;
-  gamestate: GameStatesEnum;
-  letterAnimationDelay: number;
-  letterAnimationTime: number;
-  colorblindMode: ColorBlindModeEnum;
-  setActiveColIndex: React.Dispatch<React.SetStateAction<number>>;
-};
+import { LetterCellAnimated } from "./LetterCellAnimated";
+import { LetterCellBase } from "./LetterCellBase";
+import { useGameStore } from "@/hooks/useGameStore";
 
 const getCorrectLetterOrEmpty = (
   guesses: Guess[],
@@ -35,100 +19,85 @@ const getCorrectLetterOrEmpty = (
   return "";
 };
 
-export default function Grid(props: GridProps) {
-  const rows = [];
+export default function Grid() {
+  const cells = [];
+  const {
+    guesses,
+    currentGuess,
+    activeColIndex,
+    maxAttempts,
+    status,
+    solution,
+    letterAnimationDelay,
+  } = useGameStore();
 
-  for (let rowIndex = 0; rowIndex < props.maxAttempts; rowIndex++) {
-    const isPastRow = rowIndex < props.guesses.length;
-    const isCurrentRow = rowIndex === props.guesses.length;
+  if (!solution) return null;
 
-    const cells = [];
-    if (isPastRow) {
-      const guess = props.guesses[rowIndex];
-      for (let col = 0; col < props.wordLength; col++) {
-        cells.push(
-          <LetterCell
-            key={`${rowIndex}-${col}-${guess.word[col]}`}
+  for (let rowIndex = 0; rowIndex < maxAttempts; rowIndex++) {
+    const isPastRow = rowIndex < guesses.length;
+    const isCurrentRow = rowIndex === guesses.length;
+
+    for (let col = 0; col < solution?.word.length; col++) {
+      let cell;
+
+      if (isPastRow) {
+        const guess = guesses[rowIndex];
+        const shouldAnimate =
+          status === GameStates.REVEALING && rowIndex === guesses.length - 1;
+
+        cell = (
+          <LetterCellAnimated
+            key={`${rowIndex}-${col}`}
             letter={guess.word[col]}
-            status={guess.result[col]}
-            preview={false}
-            isActive={false}
-            willFlip={props.gamestate === GameStates.REVEALING}
-            delay={props.letterAnimationDelay * col}
-            animationTime={props.letterAnimationTime}
-            colorblindMode={props.colorblindMode}
+            letterState={guess.result[col]}
+            delay={letterAnimationDelay * col}
+            willFlip={shouldAnimate}
             column={col}
-            setActiveColIndex={props.setActiveColIndex}
           />
         );
-      }
-    } else if (isCurrentRow) {
-      const paddedGuess = props.currentGuess.padEnd(props.wordLength, " ");
-
-      for (let col = 0; col < props.wordLength; col++) {
+      } else if (isCurrentRow) {
+        const paddedGuess = currentGuess.padEnd(solution?.word.length, " ");
         const char = paddedGuess[col];
+        const letter =
+          char === " " && status === GameStates.PLAYING
+            ? getCorrectLetterOrEmpty(guesses, rowIndex, col)
+            : char;
 
-        cells.push(
-          <LetterCell
-            key={`${rowIndex}-${col}-${props.gamestate}`}
-            letter={
-              char === " " && props.gamestate === GameStates.PLAYING
-                ? getCorrectLetterOrEmpty(props.guesses, rowIndex, col)
-                : char
-            }
-            status={LetterStates.NONE}
-            preview={char === " " && props.gamestate === GameStates.PLAYING}
-            isActive={
-              col === props.activeColIndex &&
-              props.gamestate === GameStates.PLAYING
-            }
-            willFlip={false}
-            delay={props.letterAnimationDelay * col}
-            animationTime={props.letterAnimationTime}
-            colorblindMode={props.colorblindMode}
+        cell = (
+          <LetterCellBase
+            key={`${rowIndex}-${col}`}
+            letter={letter}
+            letterState={LetterStates.NONE}
+            isActive={col === activeColIndex && status === GameStates.PLAYING}
+            error={status === GameStates.INVALID_GUESS}
+            preview={char === " "}
             column={col}
-            setActiveColIndex={props.setActiveColIndex}
           />
         );
-      }
-    } else {
-      for (let col = 0; col < props.wordLength; col++) {
-        cells.push(
-          <LetterCell
-            key={`${rowIndex}-${col}-${props.gamestate}`}
+      } else {
+        cell = (
+          <LetterCellBase
+            key={`${rowIndex}-${col}`}
             letter=""
-            preview={false}
-            status={LetterStates.NONE}
-            isActive={false}
-            willFlip={false}
-            delay={props.letterAnimationDelay * col}
-            animationTime={props.letterAnimationTime}
-            colorblindMode={props.colorblindMode}
+            letterState={LetterStates.NONE}
             column={col}
-            setActiveColIndex={props.setActiveColIndex}
           />
         );
       }
-    }
 
-    rows.push(
-      <div
-        key={rowIndex}
-        className={clsx(
-          "flex gap-2 w-full max-w-xs mx-auto",
-          isCurrentRow && props.gamestate === GameStates.INVALID_GUESS
-            ? "animate-shake bg-wrong/30"
-            : ""
-        )}
-      >
-        {cells}
-      </div>
-    );
+      cells.push(cell);
+    }
   }
 
   return (
-    <div className="flex flex-col gap-2 items-center p-4 bg-background">
-      {rows}
+    <div
+      className="grid w-full h-full gap-[0.4rem] p-2 sm:p-4"
+      style={{
+        gridTemplateColumns: `repeat(${solution?.word.length}, 1fr)`,
+        gridTemplateRows: `repeat(${maxAttempts}, 1fr)`,
+      }}
+    >
+      {cells}
     </div>
   );
 }

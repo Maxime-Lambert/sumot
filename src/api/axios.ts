@@ -1,90 +1,102 @@
-import axios, { AxiosError } from "axios";
+import { showToast } from "@/services/ToastService";
+import axios, {
+  AxiosError,
+  type AxiosInstance,
+  type AxiosResponse,
+  type InternalAxiosRequestConfig,
+} from "axios";
+import { useNavigate } from "react-router-dom";
 
-let isRefreshing = false;
-let failedQueue: FailedRequest[] = [];
-interface FailedRequest {
-  resolve: (value?: unknown) => void;
-  reject: (error: AxiosError) => void;
+const instance: AxiosInstance = axios.create({
+  baseURL: "https://dailyquizapi.azurewebsites.net",
+  withCredentials: true,
+});
+interface RefreshResponse {
+  accessToken: string;
 }
 
-const processQueue = (
-  error: AxiosError | null,
-  token: string | null = null
-) => {
-  failedQueue.forEach(({ resolve, reject }) => {
-    if (error) {
-      reject(error);
-    } else {
-      resolve(token);
+interface ProblemDetails {
+  title: string;
+  status: number;
+  detail: string;
+  instance: string;
+}
+
+interface RetryAxiosRequestConfig extends InternalAxiosRequestConfig {
+  _retry?: boolean;
+}
+
+let isRefreshing = false;
+let refreshSubscribers: Array<(token: string) => void> = [];
+
+function subscribeTokenRefresh(cb: (token: string) => void) {
+  refreshSubscribers.push(cb);
+}
+
+function onRefreshed(token: string) {
+  refreshSubscribers.forEach((cb) => cb(token));
+  refreshSubscribers = [];
+}
+
+instance.interceptors.request.use(
+  (config: InternalAxiosRequestConfig): InternalAxiosRequestConfig => {
+    const token = localStorage.getItem("access_token");
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
     }
-  });
-
-  failedQueue = [];
-};
-
-const instance = axios.create({
-  baseURL: "https://dailyquizapi.azurewebsites.net",
-});
-
-instance.interceptors.request.use((config) => {
-  const token = localStorage.getItem("access_token");
-
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+    config.headers["X-Client-Type"] = "SPA";
+    return config;
   }
-  return config;
-});
+);
 
 instance.interceptors.response.use(
-  (response) => response,
-  async (error) => {
-    const originalRequest = error.config;
+  (response: AxiosResponse): AxiosResponse => response,
+  async (error: AxiosError): Promise<AxiosResponse | never> => {
+    const problem = error.response?.data as ProblemDetails;
+    const originalRequest = error.config as RetryAxiosRequestConfig;
 
     if (error.response?.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true;
-
       if (isRefreshing) {
-        return new Promise((resolve, reject) => {
-          failedQueue.push({ resolve, reject });
-        })
-          .then((token) => {
-            originalRequest.headers.Authorization = `Bearer ${token}`;
-            return instance(originalRequest);
-          })
-          .catch((err) => Promise.reject(err));
+        return new Promise((resolve) => {
+          subscribeTokenRefresh((token: string) => {
+            if (originalRequest.headers) {
+              originalRequest.headers.Authorization = `Bearer ${token}`;
+            }
+            resolve(instance(originalRequest));
+          });
+        });
       }
 
+      originalRequest._retry = true;
       isRefreshing = true;
 
-      const refreshToken = localStorage.getItem("refresh_token");
-
-      if (!refreshToken) {
-        return Promise.reject(error);
-      }
-
       try {
-        const response = await axios.post(
-          "https://dailyquizapi.azurewebsites.net/refresh-token",
-          { refreshToken }
+        const { data } = await axios.post<RefreshResponse>(
+          "https://dailyquizapi.azurewebsites.net/users/refresh",
+          {},
+          { withCredentials: true }
         );
 
-        const newToken = response.data.access_token;
-        localStorage.setItem("access_token", newToken);
+        const newAccessToken = data.accessToken;
+        localStorage.setItem("access_token", newAccessToken);
 
-        processQueue(null, newToken);
+        onRefreshed(newAccessToken);
 
-        originalRequest.headers.Authorization = `Bearer ${newToken}`;
+        if (originalRequest.headers) {
+          originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+        }
+
         return instance(originalRequest);
-      } catch (err) {
-        processQueue(err as AxiosError, null);
+      } catch (refreshError) {
         localStorage.removeItem("access_token");
-        localStorage.removeItem("refresh_token");
-
-        window.location.href = "/login";
-        return Promise.reject(err);
+        const navigate = useNavigate();
+        navigate("/login");
+        return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;
       }
+    } else {
+      showToast(problem.detail || "Une erreur est survenue", "error");
     }
 
     return Promise.reject(error);

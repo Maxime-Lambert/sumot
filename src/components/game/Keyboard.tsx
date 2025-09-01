@@ -1,29 +1,12 @@
 import clsx from "clsx";
 import { analyzeGuesses } from "../../services/AnalyzeGuesses";
-import type { Guess } from "../../types/Guess";
 import type { KeyboardLayoutsEnum } from "../../types/enums/KeyboardLayoutsEnum";
-import {
-  GameStates,
-  type GameStatesEnum,
-} from "../../types/enums/GameStateEnum";
+import { GameStates } from "../../types/enums/GameStateEnum";
 import { Delete, CornerDownLeft } from "lucide-react";
-import {
-  type ColorBlindModeEnum,
-  ColorBlindMode,
-} from "../../types/enums/ColorBlindModeEnum";
-import {
-  SmartKeyboardType,
-  type SmartKeyboardTypeEnum,
-} from "../../types/enums/KeyboardTypeEnum";
-
-type KeyboardProps = {
-  guesses: Guess[];
-  layoutType: KeyboardLayoutsEnum;
-  activeColIndex: number;
-  gamestate: GameStatesEnum;
-  colorblindMode: ColorBlindModeEnum;
-  keyboardType: SmartKeyboardTypeEnum;
-};
+import { SmartKeyboardType } from "../../types/enums/KeyboardTypeEnum";
+import { useSettingsStore } from "@/hooks/useSettingStore";
+import { useGameStore } from "@/hooks/useGameStore";
+import type { Sumot } from "@/types/Sumot";
 
 const LAYOUTS: Record<KeyboardLayoutsEnum, string[][]> = {
   AZERTY: [
@@ -43,75 +26,127 @@ const LAYOUTS: Record<KeyboardLayoutsEnum, string[][]> = {
   ],
 };
 
-export default function Keyboard(props: KeyboardProps) {
-  const analyze = analyzeGuesses(props.guesses, props.keyboardType);
-  const KEYS = LAYOUTS[props.layoutType];
-  const isColorblind = props.colorblindMode === ColorBlindMode.ACTIVE;
+interface KeyboardProps {
+  sumots: Sumot[];
+}
 
-  const handleClick = (key: string) => {
-    const keyEvent = new KeyboardEvent("keydown", {
-      key:
-        key === "Backspace"
-          ? "Backspace"
-          : key === "Enter"
-          ? "Enter"
-          : key.toLowerCase(),
-    });
-    window.dispatchEvent(keyEvent);
+export default function Keyboard({ sumots }: KeyboardProps) {
+  const { keyboardLayout, keyboardType } = useSettingsStore();
+  const { status, activeColIndex, guesses, inputKey } = useGameStore();
+  const analyze = analyzeGuesses(guesses, keyboardType);
+  const KEYS = LAYOUTS[keyboardLayout];
+
+  const handleClick = (
+    key: string,
+    e?: React.MouseEvent<HTMLButtonElement>
+  ) => {
+    e?.currentTarget.blur();
+    const k =
+      key === "Backspace"
+        ? "Backspace"
+        : key === "Enter"
+        ? "Enter"
+        : key.toUpperCase();
+    inputKey(
+      k,
+      sumots?.map((s) => s.word)
+    );
   };
 
-  const getClassName = (key: string) => {
-    if (props.gamestate !== GameStates.PLAYING) return "bg-primary text-white";
-    switch (props.keyboardType) {
-      case SmartKeyboardType.NONE:
-        return "bg-primary text-white";
-      case SmartKeyboardType.SIMPLE:
-        if (analyze.missing.has(key)) {
-          return "bg-surface text-accent";
-        }
+  const getClassName = (key: string): string => {
+    const isPlaying = status === GameStates.PLAYING;
 
-        return "bg-primary text-white";
-      case SmartKeyboardType.CORRECTION:
-        if (
-          analyze.correct.has(props.activeColIndex) &&
-          analyze.correct.get(props.activeColIndex) === key
-        ) {
-          return isColorblind
-            ? "bg-colorblind-correct text-white"
-            : "bg-correct text-white";
-        }
+    const base = "text-xs sm:text-sm font-semibold uppercase rounded border";
 
-        if (analyze.missing.has(key)) {
-          return "bg-surface text-accent";
-        }
-
-        return "bg-primary text-white";
+    if (!isPlaying || keyboardType === SmartKeyboardType.None) {
+      return clsx(
+        base,
+        "bg-cell-background-default text-cell-foreground-default border-cell-border-default"
+      );
     }
+
+    if (keyboardType === SmartKeyboardType.Simple) {
+      if (analyze.missing.has(key)) {
+        return clsx(
+          base,
+          "bg-cell-background-missing text-cell-foreground-missing border-cell-border-default"
+        );
+      }
+      return clsx(
+        base,
+        "bg-cell-background-default text-cell-foreground-default border-cell-border-default"
+      );
+    }
+
+    if (keyboardType === SmartKeyboardType.Correct) {
+      const isCorrect =
+        analyze.correct.get(activeColIndex) === key &&
+        analyze.correct.has(activeColIndex);
+
+      if (isCorrect) {
+        return clsx(
+          base,
+          "bg-cell-background-correct text-cell-foreground-correct border-cell-border-default"
+        );
+      }
+
+      if (analyze.missing.has(key)) {
+        return clsx(
+          base,
+          "bg-cell-background-missing text-cell-foreground-missing border-cell-border-default"
+        );
+      }
+
+      return clsx(
+        base,
+        "bg-cell-background-default text-cell-foreground-default border-cell-border-default"
+      );
+    }
+
+    return clsx(
+      base,
+      "bg-cell-background-default text-cell-foreground-default border-cell-border-default"
+    );
   };
 
   return (
-    <div className="mt-4 flex flex-col gap-2">
+    <div
+      className="flex flex-col gap-[0.5rem] w-full max-w-[680px] px-2 sm:px-4 
+                 items-center justify-center mx-auto"
+    >
       {KEYS.map((row, rowIndex) => (
-        <div key={rowIndex} className="flex justify-center gap-2">
-          {row.map((key) => (
-            <button
-              key={key}
-              className={clsx(
-                "h-16 min-w-[4rem] rounded text-sm font-semibold uppercase border border-accent",
-                key === "Enter" || key === "Backspace" ? "flex-1" : "flex-2",
-                getClassName(key)
-              )}
-              onClick={() => handleClick(key)}
-            >
-              {key === "Backspace" ? (
-                <Delete className="mx-auto" size={16} />
-              ) : key === "Enter" ? (
-                <CornerDownLeft className="mx-auto" size={16} />
-              ) : (
-                key
-              )}
-            </button>
-          ))}
+        <div
+          key={rowIndex}
+          className="grid w-full gap-[0.4rem]"
+          style={{
+            gridTemplateColumns: row
+              .map((key) =>
+                key === "Enter" || key === "Backspace" ? "1.5fr" : "1fr"
+              )
+              .join(" "),
+          }}
+        >
+          {row.map((key) => {
+            return (
+              <button
+                key={key}
+                onClick={(e) => handleClick(key, e)}
+                className={clsx(
+                  getClassName(key),
+                  "flex items-center justify-center rounded border font-bold text-lg sm:text-xl select-none transition-colors duration-150 ease-in-out",
+                  "py-1 sm:py-3"
+                )}
+              >
+                {key === "Backspace" ? (
+                  <Delete className="w-5 h-5 sm:w-6 sm:h-6" />
+                ) : key === "Enter" ? (
+                  <CornerDownLeft className="w-5 h-5 sm:w-6 sm:h-6" />
+                ) : (
+                  key
+                )}
+              </button>
+            );
+          })}
         </div>
       ))}
     </div>

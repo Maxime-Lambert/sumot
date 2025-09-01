@@ -4,4 +4,5 @@ export interface Sumot {
   day: string | null;
   definition: string;
   definitionWord: string;
+  isDifficult: boolean;
 }

@@ -12,5 +12,7 @@ export async function patchUser(
     ColorblindMode: patchUserRequest.colorblindmode,
     SmartKeyboardType: patchUserRequest.smartkeyboardtype,
     KeyboardLayout: patchUserRequest.keyboardlayout,
+    PlaysWithDifficultWords: patchUserRequest.playsWithDifficultWords,
+    FrontEndName: 0,
   });
 }

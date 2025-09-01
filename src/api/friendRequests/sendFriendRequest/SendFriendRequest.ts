@@ -9,5 +9,5 @@ export type SendFriendRequestResponse = void;
 export async function sendFriendRequest(
   request: SendFriendRequestRequest
 ): Promise<SendFriendRequestResponse> {
-  await axios.post("/friendrequests/send", request);
+  await axios.post("/friendrequests", request);
 }

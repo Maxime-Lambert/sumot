@@ -1,107 +1,177 @@
-import { X } from "lucide-react";
 import {
-  ColorBlindMode,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Select, SelectValue } from "@/components/ui/select";
+import ThemedSelectContent from "@/components/ui/themed/content";
+import ThemedSelectItem from "@/components/ui/themed/item";
+import ThemedSelectTrigger from "@/components/ui/themed/trigger";
+
+import {
+  ColorBlindModes,
   type ColorBlindModeEnum,
-} from "../../../types/enums/ColorBlindModeEnum";
+  ColorBlindModeApiMap,
+  ColorBlindModeLabels,
+} from "@/types/enums/ColorBlindModeEnum";
 import {
   KeyboardLayouts,
   type KeyboardLayoutsEnum,
-} from "../../../types/enums/KeyboardLayoutsEnum";
+  KeyboardLayoutsApiMap,
+  KeyboardLayoutsLabels,
+} from "@/types/enums/KeyboardLayoutsEnum";
 import {
   SmartKeyboardType,
   type SmartKeyboardTypeEnum,
-} from "../../../types/enums/KeyboardTypeEnum";
+  SmartKeyboardTypeApiMap,
+  SmartKeyboardTypeLabels,
+} from "@/types/enums/KeyboardTypeEnum";
 
-type SettingsModalProps = {
+import { useSettingsStore } from "@/hooks/useSettingStore";
+import { patchUser } from "@/api/users/patchUser/PatchUser";
+
+interface SettingsModalProps {
   isOpen: boolean;
   onClose: () => void;
-  layoutType: KeyboardLayoutsEnum;
-  onLayoutChange: (layout: KeyboardLayoutsEnum) => void;
-  colorblindMode: ColorBlindModeEnum;
-  onColorBlindChange: (mode: ColorBlindModeEnum) => void;
-  keyboardType: SmartKeyboardTypeEnum;
-  onKeyboardTypeChange: (mode: SmartKeyboardTypeEnum) => void;
-};
+}
 
-export default function SettingsModal(props: SettingsModalProps) {
-  if (!props.isOpen) return null;
+export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
+  const {
+    colorblindMode,
+    keyboardLayout,
+    keyboardType,
+    playsWithDifficultWords,
+    userId,
+    setColorblindMode,
+    setKeyboardLayout,
+    setKeyboardType,
+    setPlaysWithDifficultWords,
+  } = useSettingsStore();
+
+  async function updateSetting<T extends string>(
+    storeSetter: (v: T) => void,
+    apiField: keyof Parameters<typeof patchUser>[0],
+    value: T,
+    map: Record<T, number>
+  ) {
+    storeSetter(value);
+    if (!userId) return;
+    await patchUser({ [apiField]: map[value] }, userId);
+  }
+
+  async function updateDifficulty(value: boolean) {
+    setPlaysWithDifficultWords(value);
+    if (!userId) return;
+    await patchUser({ playsWithDifficultWords: value }, userId);
+  }
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex justify-center items-center">
-      <div className="bg-surface border border-accent rounded-xl shadow-xl w-full max-w-md p-6 relative">
-        <button
-          onClick={props.onClose}
-          className="absolute top-3 right-3 text-white text-sm px-2 py-1 rounded hover:bg-white/10 transition"
-        >
-          <X />
-        </button>
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-md bg-primary-container text-primary-container-foreground border border-primary-container-border">
+        <DialogHeader>
+          <DialogTitle className="text-center">Paramètres</DialogTitle>
+        </DialogHeader>
 
-        <h2 className="text-xl font-bold text-white mb-4">Paramètres</h2>
+        <div className="space-y-4 text-sm">
+          <div className="flex flex-col gap-1">
+            <Label>Mode daltonien</Label>
+            <Select
+              value={colorblindMode}
+              onValueChange={(v) =>
+                updateSetting(
+                  setColorblindMode,
+                  "colorblindmode",
+                  v as ColorBlindModeEnum,
+                  ColorBlindModeApiMap
+                )
+              }
+            >
+              <ThemedSelectTrigger>
+                <SelectValue />
+              </ThemedSelectTrigger>
+              <ThemedSelectContent>
+                {Object.values(ColorBlindModes).map((mode) => (
+                  <ThemedSelectItem key={mode} value={mode}>
+                    {ColorBlindModeLabels[mode]}
+                  </ThemedSelectItem>
+                ))}
+              </ThemedSelectContent>
+            </Select>
+          </div>
 
-        <div className="mb-4">
-          <label className="block text-white mb-1">Mode daltonien</label>
-          <select
-            value={props.colorblindMode}
-            onChange={(e) =>
-              props.onColorBlindChange(e.target.value as ColorBlindModeEnum)
-            }
-            className="w-full p-2 rounded bg-surface border border-accent text-white"
-          >
-            {Object.keys(ColorBlindMode).map((key) => (
-              <option
-                key={key}
-                value={ColorBlindMode[key as keyof typeof ColorBlindMode]}
-              >
-                {ColorBlindMode[key as keyof typeof ColorBlindMode]}
-              </option>
-            ))}
-          </select>
+          <div className="flex flex-col gap-1">
+            <Label>Disposition du clavier</Label>
+            <Select
+              value={keyboardLayout}
+              onValueChange={(v) =>
+                updateSetting(
+                  setKeyboardLayout,
+                  "keyboardlayout",
+                  v as KeyboardLayoutsEnum,
+                  KeyboardLayoutsApiMap
+                )
+              }
+            >
+              <ThemedSelectTrigger>
+                <SelectValue />
+              </ThemedSelectTrigger>
+              <ThemedSelectContent>
+                {Object.values(KeyboardLayouts).map((layout) => (
+                  <ThemedSelectItem key={layout} value={layout}>
+                    {KeyboardLayoutsLabels[layout]}
+                  </ThemedSelectItem>
+                ))}
+              </ThemedSelectContent>
+            </Select>
+          </div>
+
+          <div className="flex flex-col gap-1">
+            <Label>Indications du clavier pour le mot en cours</Label>
+            <Select
+              value={keyboardType}
+              onValueChange={(v) =>
+                updateSetting(
+                  setKeyboardType,
+                  "smartkeyboardtype",
+                  v as SmartKeyboardTypeEnum,
+                  SmartKeyboardTypeApiMap
+                )
+              }
+            >
+              <ThemedSelectTrigger>
+                <SelectValue />
+              </ThemedSelectTrigger>
+              <ThemedSelectContent>
+                {Object.values(SmartKeyboardType).map((type) => (
+                  <ThemedSelectItem key={type} value={type}>
+                    {SmartKeyboardTypeLabels[type]}
+                  </ThemedSelectItem>
+                ))}
+              </ThemedSelectContent>
+            </Select>
+          </div>
+
+          <div className="flex flex-col gap-1">
+            <Label>Difficulté des mots en mode infini</Label>
+            <Select
+              value={String(playsWithDifficultWords)}
+              onValueChange={(v) => updateDifficulty(v === "true")}
+            >
+              <ThemedSelectTrigger>
+                <SelectValue />
+              </ThemedSelectTrigger>
+              <ThemedSelectContent>
+                <ThemedSelectItem value="true">
+                  Standard + Difficiles (conjugaisons, mots rares...)
+                </ThemedSelectItem>
+                <ThemedSelectItem value="false">Standard</ThemedSelectItem>
+              </ThemedSelectContent>
+            </Select>
+          </div>
         </div>
-
-        <div className="mb-4">
-          <label className="block text-white mb-1">
-            Disposition du clavier
-          </label>
-          <select
-            value={props.layoutType}
-            onChange={(e) =>
-              props.onLayoutChange(e.target.value as KeyboardLayoutsEnum)
-            }
-            className="w-full p-2 rounded bg-surface border border-accent text-white"
-          >
-            {Object.keys(KeyboardLayouts).map((key) => (
-              <option
-                key={key}
-                value={KeyboardLayouts[key as keyof typeof KeyboardLayouts]}
-              >
-                {KeyboardLayouts[key as keyof typeof KeyboardLayouts]}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="mb-4">
-          <label className="block text-white mb-1">Type de clavier</label>
-          <select
-            value={props.keyboardType}
-            onChange={(e) =>
-              props.onKeyboardTypeChange(
-                e.target.value as SmartKeyboardTypeEnum
-              )
-            }
-            className="w-full p-2 rounded bg-surface border border-accent text-white"
-          >
-            {Object.keys(SmartKeyboardType).map((key) => (
-              <option
-                key={key}
-                value={SmartKeyboardType[key as keyof typeof SmartKeyboardType]}
-              >
-                {SmartKeyboardType[key as keyof typeof SmartKeyboardType]}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }

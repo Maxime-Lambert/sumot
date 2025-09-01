@@ -3,7 +3,8 @@ export interface PatchUserRequest {
   email?: string;
   lastpassword?: string;
   password?: string;
-  colorblindmode?: string;
-  smartkeyboardtype?: string;
-  keyboardlayout?: string;
+  colorblindmode?: number;
+  smartkeyboardtype?: number;
+  keyboardlayout?: number;
+  playsWithDifficultWords?: boolean;
 }
