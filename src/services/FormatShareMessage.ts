@@ -45,7 +45,7 @@ export const formatShareMessage = (
       } 🔥`
     : `😢 Sumot du ${dayFr} pas trouvé…`;
 
-  return `${messageHeader}\n\n${statusesGrid.join(
-    ""
-  )}\n\nViens jouer 👉 https://www.sumot.app ou télécharge Sumot sur le Play Store`;
+  return `${messageHeader}\n${statusesGrid.join(
+    "\n"
+  )}\nViens jouer 👉 https://www.sumot.app ou télécharge Sumot sur le Play Store`;
 };

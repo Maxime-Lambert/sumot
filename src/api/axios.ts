@@ -6,6 +6,7 @@ import axios, {
   type InternalAxiosRequestConfig,
 } from "axios";
 import { useNavigate } from "react-router-dom";
+import { logoutUser } from "./users/logout/Logout";
 
 const instance: AxiosInstance = axios.create({
   baseURL: "https://dailyquizapi.azurewebsites.net",
@@ -89,6 +90,7 @@ instance.interceptors.response.use(
         return instance(originalRequest);
       } catch (refreshError) {
         localStorage.removeItem("access_token");
+        await logoutUser();
         const navigate = useNavigate();
         navigate("/login");
         return Promise.reject(refreshError);
