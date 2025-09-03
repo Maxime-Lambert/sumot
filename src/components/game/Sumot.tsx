@@ -3,7 +3,7 @@ import GameResultPanel from "@/components/game/GameResultPanel";
 import GameScorePanel from "@/components/game/GameScorePanel";
 import GameResultModal from "@/components/game/GameResultModal";
 import LoadingScreen from "@/components/game/LoadingScreen";
-import { GameStates, type GameStatesEnum } from "@/types/enums/GameStateEnum";
+import { GameStates } from "@/types/enums/GameStateEnum";
 import { useGameStore } from "@/hooks/useGameStore";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useSettingsStore } from "@/hooks/useSettingStore";
@@ -33,7 +33,6 @@ export default function Sumot() {
     inputKey,
     reset,
     setGuesses,
-    setSolution,
     setStatus,
     status,
     solution,
@@ -57,17 +56,16 @@ export default function Sumot() {
     [sumots]
   );
 
-  function applyGuesses(guesses: Guess[]) {
+  function applyGuesses(guesses: Guess[], match: string) {
     setGuesses(guesses);
     const lastGuess = guesses.at(-1);
-    if (lastGuess?.word === solution?.word) setStatus(GameStates.WON);
+    if (lastGuess?.word === match) setStatus(GameStates.WON);
     else if (guesses.length >= maxAttempts) setStatus(GameStates.LOST);
     else setStatus(GameStates.PLAYING);
   }
 
   useEffect(() => {
     async function load() {
-      setStatus(GameStates.LOADING);
       const local = await getItem("sumots:all");
       const loaded = local
         ? await updateSumotsFromDate()
@@ -78,78 +76,71 @@ export default function Sumot() {
       if (dayParam) {
         if (!isValidDateParam(dayParam)) {
           navigate("/404", { replace: true });
+          return;
         }
         match = loaded.find(
           (s) => s.day?.toLowerCase() === dayParam.toLowerCase()
         );
       } else if (infiniteParam) {
-        if (playsWithDifficultWords) {
-          match = loaded.at(getRandomInRange(loaded.length));
-        } else {
-          const normalWords = loaded.filter((l) => !l.isDifficult);
-          match = normalWords.at(getRandomInRange(normalWords.length));
-        }
+        const pool = playsWithDifficultWords
+          ? loaded
+          : loaded.filter((l) => !l.isDifficult);
+        match = pool.at(getRandomInRange(pool.length));
       } else {
         const today = new Date().toISOString().split("T")[0];
         match = loaded.find((s) => s.day === today);
       }
 
-      if (match) {
-        setSumots(loaded);
-        setSolution(match);
-      } else {
+      if (!match) {
         navigate("/404", { replace: true });
+        return;
       }
-    }
 
-    void load();
-  }, [dayParam, infiniteParam]);
+      setSumots(loaded);
+      reset(match);
 
-  useEffect(() => {
-    if (!solution) return;
-    reset(solution);
-    if (infiniteParam) {
-      setStatus(GameStates.PLAYING);
-      return;
-    }
-    const token = localStorage.getItem("access_token");
-    if (token) {
-      const fetch = async () => {
+      // === 2. Charger historique ===
+      if (infiniteParam) {
+        setStatus(GameStates.PLAYING);
+        return;
+      }
+
+      const token = localStorage.getItem("access_token");
+      if (token) {
         const histories = await getSumotHistories({
-          MinDate: solution.day!,
-          MaxDate: solution.day!,
+          MinDate: match.day!,
+          MaxDate: match.day!,
         });
         const username = getUsernameFromToken(token);
         const history = histories.find((h) => h.username === username);
-        if (history) {
-          const guesses: Guess[] = history.tries.map((tryWord: string) => {
-            const letterStates = evaluateGuess(tryWord, solution.word);
-            return {
-              word: tryWord,
-              result: letterStates,
-            };
-          });
 
-          applyGuesses(guesses);
+        if (history) {
+          const guesses: Guess[] = history.tries.map((word) => ({
+            word,
+            result: evaluateGuess(word, match.word),
+          }));
+          applyGuesses(guesses, match.word);
         } else {
           setStatus(GameStates.PLAYING);
         }
-      };
-      void fetch();
-    } else {
-      const buffered = getBufferedSumotHistoryByWord(solution.word);
-      if (buffered) {
-        const loadedGuesses = buffered.tries.map((word) => ({
-          word,
-          result: evaluateGuess(word, solution.word),
-        }));
+        return;
+      }
 
-        applyGuesses(loadedGuesses);
+      const buffered = getBufferedSumotHistoryByWord(match.word);
+      if (buffered) {
+        const guesses = buffered.tries.map((word) => ({
+          word,
+          result: evaluateGuess(word, match.word),
+        }));
+        applyGuesses(guesses, match.word);
       } else {
         setStatus(GameStates.PLAYING);
       }
     }
-  }, [solution, reset, setGuesses, setStatus, maxAttempts]);
+
+    setStatus(GameStates.LOADING);
+    void load();
+  }, [dayParam, infiniteParam, navigate]);
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
@@ -168,11 +159,8 @@ export default function Sumot() {
     }
   }, [status]);
 
-  const isGameOver = (
-    [GameStates.WON, GameStates.LOST] as GameStatesEnum[]
-  ).includes(status);
-  const isSmallScreen =
-    typeof window !== "undefined" && window.innerWidth < 768;
+  const isGameOver = status === GameStates.WON || status === GameStates.LOST;
+  const isSmallScreen = window?.innerWidth < 768;
 
   useEffect(() => {
     if (isSmallScreen && isGameOver) {
