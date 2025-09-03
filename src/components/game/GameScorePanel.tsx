@@ -145,61 +145,32 @@ export default function GameScorePanel({
           </div>
         ) : (
           data.length > 0 && (
-            <>
-              <ul className="space-y-6 mb-6">
-                {data.slice(0, 3).map((entry, index) => {
-                  const isCurrentUser = entry.username === username;
-                  return (
-                    <li
-                      key={entry.id}
-                      className="flex flex-col items-center space-y-2"
-                    >
-                      {username && (
-                        <span
-                          className={clsx(
-                            "text-sm",
-                            isCurrentUser
-                              ? "font-bold text-primary"
-                              : "text-primary-container-muted"
-                          )}
-                        >
-                          #{index + 1} - {entry.username}
-                        </span>
-                      )}
-
-                      {renderTries(entry.tries, sumot.word)}
-                    </li>
-                  );
-                })}
-              </ul>
-
-              {data.length > 3 && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                  {data.slice(3).map((entry, index) => {
-                    const rank = index + 4;
-                    const isCurrentUser = entry.username === username;
-                    return (
-                      <div
-                        key={entry.id}
-                        className="flex flex-col items-center space-y-1 text-xs"
+            <ul className="space-y-6 mb-6">
+              {data.map((entry, index) => {
+                const isCurrentUser = entry.username === username;
+                return (
+                  <li
+                    key={entry.id}
+                    className="flex flex-col items-center space-y-2"
+                  >
+                    {username && (
+                      <span
+                        className={clsx(
+                          "text-sm",
+                          isCurrentUser
+                            ? "font-bold text-primary"
+                            : "text-primary-container-muted"
+                        )}
                       >
-                        <span
-                          className={clsx(
-                            "text-xs",
-                            isCurrentUser
-                              ? "font-bold text-primary"
-                              : "text-primary-container-muted"
-                          )}
-                        >
-                          #{rank}
-                        </span>
-                        {renderTries(entry.tries, sumot.word)}
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </>
+                        #{index + 1} - {entry.username}
+                      </span>
+                    )}
+
+                    {renderTries(entry.tries, sumot.word)}
+                  </li>
+                );
+              })}
+            </ul>
           )
         )}
       </CardContent>
