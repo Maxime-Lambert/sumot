@@ -9,7 +9,7 @@ export interface GetSumotHistoriesResponse {
   id: number;
   word: string;
   tries: string[];
-  username: string;
+  userName: string;
   won: boolean;
 }
 

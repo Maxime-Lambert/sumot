@@ -78,7 +78,7 @@ export default function CreateAccountPage() {
 
     try {
       const createUserRequest: CreateUserRequest = {
-        username: form.userName,
+        userName: form.userName,
         password: form.password,
         ...(form.email && { email: form.email }),
       };
@@ -124,7 +124,10 @@ export default function CreateAccountPage() {
                   sideOffset={8}
                   className="bg-primary-container text-primary-container-foreground max-w-xs break-words"
                 >
-                  <p>Seulement lettres et chiffres</p>
+                  <p>
+                    Seulement lettres et chiffres, caractères spéciaux & accents
+                    interdits
+                  </p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>

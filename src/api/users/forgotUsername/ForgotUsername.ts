@@ -1,6 +1,6 @@
 import axios from "@/api/axios";
 
-export interface ForgotUsernamedRequest {
+export interface ForgotUsernameRequest {
   email: string;
   frontEndName: number;
 }
@@ -8,7 +8,7 @@ export interface ForgotUsernamedRequest {
 export type ForgotUsernameResponse = void;
 
 export async function forgotUsername(
-  request: ForgotUsernamedRequest
+  request: ForgotUsernameRequest
 ): Promise<ForgotUsernameResponse> {
   await axios.post("/users/forgotusername", request);
 }

@@ -1,7 +1,7 @@
 import axios from "../../axios";
 
 export interface SendFriendRequestRequest {
-  targetUsername: string;
+  targetUserName: string;
 }
 
 export type SendFriendRequestResponse = void;

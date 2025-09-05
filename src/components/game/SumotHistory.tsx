@@ -81,9 +81,9 @@ export function SumotHistory() {
           MinDate: minDate,
           MaxDate: maxDate,
         });
-        const username = getUsernameFromToken(token);
+        const userName = getUsernameFromToken(token);
         const playerHistories = histories.filter(
-          (h) => h.username === username
+          (h) => h.userName === userName
         );
 
         const mapped: Record<string, PlayerHistory> = {};

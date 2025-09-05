@@ -1,23 +1,9 @@
+import { getCorrectLetterOrEmpty } from "@/services/GetCorrectLetterOrEmpty";
 import { GameStates } from "../../types/enums/GameStateEnum";
-import type { Guess } from "../../types/Guess";
 import { LetterStates } from "../../types/enums/LetterStateEnum";
 import { LetterCellAnimated } from "./LetterCellAnimated";
 import { LetterCellBase } from "./LetterCellBase";
 import { useGameStore } from "@/hooks/useGameStore";
-
-const getCorrectLetterOrEmpty = (
-  guesses: Guess[],
-  row: number,
-  col: number
-) => {
-  for (let i = 0; i < row; i++) {
-    const guess = guesses[i];
-    if (guess.result[col] === LetterStates.CORRECT) {
-      return guess.word[col];
-    }
-  }
-  return "";
-};
 
 export default function Grid() {
   const cells = [];

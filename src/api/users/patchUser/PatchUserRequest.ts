@@ -1,5 +1,5 @@
 export interface PatchUserRequest {
-  username?: string;
+  userName?: string;
   email?: string;
   lastpassword?: string;
   password?: string;

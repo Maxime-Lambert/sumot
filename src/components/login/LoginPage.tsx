@@ -14,7 +14,7 @@ import { SmartKeyboardTypeApiMap } from "@/types/enums/KeyboardTypeEnum";
 
 export const LoginPage = () => {
   const navigate = useNavigate();
-  const [username, setUsername] = useState("");
+  const [userName, setUserName] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { colorblindMode, keyboardLayout, keyboardType, setUserId } =
@@ -31,7 +31,7 @@ export const LoginPage = () => {
     setIsLoading(true);
     try {
       const response = await loginUser({
-        username,
+        userName: userName,
         password,
         ipAdress: "127.0.0.1",
       });
@@ -61,11 +61,11 @@ export const LoginPage = () => {
 
       <div className="space-y-4">
         <ThemedInput
-          id="username"
+          id="userName"
           placeholder="JohnDoe38"
           label="Nom d'utilisateur"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
+          value={userName}
+          onChange={(e) => setUserName(e.target.value)}
           required
         />
 
