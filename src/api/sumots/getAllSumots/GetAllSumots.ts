@@ -15,6 +15,7 @@ export async function fetchInitialSumots(): Promise<Sumot[]> {
   await setItem(STORAGE_SUMOTS_KEY, JSON.stringify(sumots));
   if (sumots.length > 0) {
     await setItem(STORAGE_UPDATE_DATE_KEY, new Date().toISOString());
+    await setItem("sumots:version", String(response.data.version));
   }
   return sumots;
 }
@@ -22,10 +23,15 @@ export async function fetchInitialSumots(): Promise<Sumot[]> {
 export async function updateSumotsFromDate(): Promise<Sumot[]> {
   const lastUpdate = (await getItem(STORAGE_UPDATE_DATE_KEY)) as string;
   if (!lastUpdate) return [];
+  const version = await getItem("sumots:version");
 
   const response = await axios.get<SumotResponse>("/sumots", {
     params: { day: lastUpdate.split("T")[0] },
   });
+  const distantVersion = String(response.data?.version);
+  if (version !== distantVersion) {
+    return await fetchInitialSumots();
+  }
 
   const updates = response.data?.sumots ?? [];
   const stored = JSON.parse(
