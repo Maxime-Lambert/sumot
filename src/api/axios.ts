@@ -13,7 +13,7 @@ const instance: AxiosInstance = axios.create({
   withCredentials: true,
 });
 interface RefreshResponse {
-  accessToken: string;
+  token: string;
 }
 
 interface ProblemDetails {
@@ -78,7 +78,7 @@ instance.interceptors.response.use(
           { withCredentials: true }
         );
 
-        const newAccessToken = data.accessToken;
+        const newAccessToken = data.token;
         localStorage.setItem("access_token", newAccessToken);
 
         onRefreshed(newAccessToken);
