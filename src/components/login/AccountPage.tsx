@@ -35,7 +35,7 @@ export default function AccountPage() {
   const token = localStorage.getItem("access_token");
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<PatchUserRequest>({
-    username: "",
+    userName: "",
     email: "",
     password: "",
     lastpassword: "",
@@ -62,7 +62,7 @@ export default function AccountPage() {
       }
       const user = await getUser();
       setUser({
-        username: user.userName,
+        userName: user.userName,
         email: user.email,
         lastpassword: "",
         password: "",
@@ -166,10 +166,10 @@ export default function AccountPage() {
       </div>
 
       <ThemedInput
-        id="username"
-        name="username"
+        id="userName"
+        name="userName"
         label="Nom d'utilisateur"
-        value={user.username}
+        value={user.userName}
         onChange={handleChange}
         disabled={!editMode}
       />

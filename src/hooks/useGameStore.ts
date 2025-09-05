@@ -4,6 +4,7 @@ import type { Guess } from "@/types/Guess";
 import type { Sumot } from "@/types/Sumot";
 import { evaluateGuess } from "@/services/EvaluateGuess";
 import { handleGameOver } from "@/services/SumotHistoryStorage";
+import { getCorrectLetterOrEmpty } from "@/services/GetCorrectLetterOrEmpty";
 
 interface GameState {
   guesses: Guess[];
@@ -72,15 +73,31 @@ export const useGameStore = create<GameState>((set, get) => ({
       const guessOk =
         currentGuess.length === solution.word.length &&
         sumots.some((s) => s === currentGuess);
+      let usedGuess = currentGuess;
 
       if (!guessOk) {
-        set({ status: GameStates.INVALID_GUESS });
-        setTimeout(() => set({ status: GameStates.PLAYING }), 500);
-        return;
+        const previewGuess = currentGuess
+          .split("")
+          .map((c, i) =>
+            c === " " ? getCorrectLetterOrEmpty(guesses, guesses.length, i) : c
+          )
+          .join("");
+        const previewGuessOk =
+          previewGuess.length === solution.word.length &&
+          sumots.some((s) => s === previewGuess);
+        if (!previewGuessOk) {
+          set({
+            status: GameStates.INVALID_GUESS,
+          });
+          setTimeout(() => set({ status: GameStates.PLAYING }), 500);
+          return;
+        } else {
+          usedGuess = previewGuess;
+        }
       }
 
-      const result = evaluateGuess(currentGuess, solution.word);
-      const newGuesses = [...guesses, { word: currentGuess, result }];
+      const result = evaluateGuess(usedGuess, solution.word);
+      const newGuesses = [...guesses, { word: usedGuess, result }];
 
       set({
         guesses: newGuesses,

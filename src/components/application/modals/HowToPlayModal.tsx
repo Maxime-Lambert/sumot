@@ -55,12 +55,15 @@ export default function HowToPlayModal({
             />
           </div>
 
-          <DialogTitle className="text-center">Astuce</DialogTitle>
+          <DialogTitle className="text-center">Astuces</DialogTitle>
           <p>
             Il est possible de déplacer la case active en cliquant sur une
             colonne ou bien avec les flèches gauches et droites du clavier.
           </p>
-
+          <p>
+            Il est possible de valider un mot simplement en remplissant les
+            cases qui n'ont pas de preview.
+          </p>
           <DialogTitle className="text-center">Remerciements</DialogTitle>
           <p>
             La base de données des mots provient de : Pallier, Christophe & New,

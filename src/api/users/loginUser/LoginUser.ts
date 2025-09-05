@@ -7,7 +7,7 @@ export async function loginUser(
   loginUserRequest: LoginUserRequest
 ): Promise<AxiosResponse> {
   const response = await axios.post<LoginUserResponse>("/users/login", {
-    userName: loginUserRequest.username,
+    userName: loginUserRequest.userName,
     password: loginUserRequest.password,
     ipAddress: loginUserRequest.ipAdress,
   });

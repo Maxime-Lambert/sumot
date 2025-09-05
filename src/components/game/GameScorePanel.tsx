@@ -20,6 +20,7 @@ import { ThemedButton } from "../ui/themed/button";
 import { LetterCellBase } from "./LetterCellBase";
 import { showToast } from "@/services/ToastService";
 import LoadingScreen from "./LoadingScreen";
+import { Separator } from "../ui/separator";
 
 interface GameScorePanelProps {
   sumot?: Sumot;
@@ -28,9 +29,10 @@ interface GameScorePanelProps {
 
 interface ScoreEntry {
   id: number;
-  username: string;
+  userName: string;
   tries: string[];
   word: string;
+  status: "won" | "lost" | "started";
 }
 
 export default function GameScorePanel({
@@ -38,7 +40,7 @@ export default function GameScorePanel({
   guesses,
 }: GameScorePanelProps) {
   const [data, setData] = useState<ScoreEntry[]>([]);
-  const [username, setUsername] = useState<string | null>(null);
+  const [userName, setUsername] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [searchParams] = useSearchParams();
   const infiniteMode = searchParams.has("infinite");
@@ -52,9 +54,15 @@ export default function GameScorePanel({
         setData([
           {
             id: 0,
-            username: "Moi",
-            tries: guesses ? guesses.map((g) => g.word) : [],
+            userName: "Moi",
+            tries: guesses!.map((g) => g.word),
             word: sumot.word,
+            status:
+              guesses!.at(-1)?.word === sumot.word
+                ? "won"
+                : guesses?.length === 6
+                ? "lost"
+                : "started",
           },
         ]);
         setLoading(false);
@@ -72,9 +80,15 @@ export default function GameScorePanel({
           setData(
             histories.map((h) => ({
               id: h.id,
-              username: h.username,
+              userName: h.userName,
               tries: h.tries,
               word: sumot.word,
+              status:
+                h.tries.at(-1) === sumot.word
+                  ? "won"
+                  : h.tries.length === 6
+                  ? "lost"
+                  : "started",
             }))
           );
         } finally {
@@ -86,9 +100,15 @@ export default function GameScorePanel({
           setData([
             {
               id: 0,
-              username: "Moi",
+              userName: "Moi",
               tries: local.tries,
               word: sumot.word,
+              status:
+                local.tries.at(-1) === sumot.word
+                  ? "won"
+                  : local.tries.length === 6
+                  ? "lost"
+                  : "started",
             },
           ]);
         }
@@ -146,30 +166,60 @@ export default function GameScorePanel({
         ) : (
           data.length > 0 && (
             <ul className="space-y-6 mb-6">
-              {data.map((entry, index) => {
-                const isCurrentUser = entry.username === username;
-                return (
-                  <li
-                    key={entry.id}
-                    className="flex flex-col items-center space-y-2"
-                  >
-                    {username && (
-                      <span
-                        className={clsx(
-                          "text-sm",
-                          isCurrentUser
-                            ? "font-bold text-primary"
-                            : "text-primary-container-muted"
-                        )}
-                      >
-                        #{index + 1} - {entry.username}
-                      </span>
-                    )}
+              {data
+                .filter((d) => d.status !== "started")
+                .map((entry, index) => {
+                  const isCurrentUser = entry.userName === userName;
+                  return (
+                    <li
+                      key={entry.id}
+                      className="flex flex-col items-center space-y-2"
+                    >
+                      {userName && (
+                        <span
+                          className={clsx(
+                            "text-sm",
+                            isCurrentUser
+                              ? "font-bold text-primary"
+                              : "text-primary-container-muted"
+                          )}
+                        >
+                          #{index + 1} - {entry.userName}
+                        </span>
+                      )}
 
-                    {renderTries(entry.tries, sumot.word)}
-                  </li>
-                );
-              })}
+                      {renderTries(entry.tries, sumot.word)}
+                    </li>
+                  );
+                })}
+              <Separator className="my-2" />
+              {data.some((d) => d.status === "started") && (
+                <h3 className="text-center text-base font-semibold">
+                  En cours
+                </h3>
+              )}
+              {data
+                .filter((d) => d.status === "started")
+                .map((entry) => {
+                  return (
+                    <li
+                      key={entry.id}
+                      className="flex flex-col items-center space-y-2"
+                    >
+                      {userName && (
+                        <span
+                          className={clsx(
+                            "text-sm text-primary-container-muted"
+                          )}
+                        >
+                          {entry.userName}
+                        </span>
+                      )}
+
+                      {renderTries(entry.tries, sumot.word)}
+                    </li>
+                  );
+                })}
             </ul>
           )
         )}

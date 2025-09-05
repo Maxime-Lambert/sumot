@@ -130,6 +130,10 @@ export default function Keyboard({ sumots }: KeyboardProps) {
           {row.map((key) => {
             return (
               <button
+                type="button"
+                autoCorrect="off"
+                autoCapitalize="off"
+                spellCheck="false"
                 key={key}
                 onClick={(e) => handleClick(key, e)}
                 className={clsx(

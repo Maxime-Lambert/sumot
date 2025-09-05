@@ -15,7 +15,7 @@ export default function FriendsPage() {
   const { acceptedFriends, pendingSent, pendingReceived, fetchFriendRequests } =
     useFriendRequestsStore();
   const { userId } = useSettingsStore();
-  const [targetUsername, setTargetUsername] = useState("");
+  const [targetUserName, setTargetUserName] = useState("");
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<"friends" | "sent" | "received">(
     "friends"
@@ -32,12 +32,12 @@ export default function FriendsPage() {
   ];
 
   async function handleSendRequest() {
-    if (!targetUsername.trim()) return;
+    if (!targetUserName.trim()) return;
     setLoading(true);
     try {
-      await sendFriendRequest({ targetUsername: targetUsername.trim() });
+      await sendFriendRequest({ targetUserName: targetUserName.trim() });
       showToast("Demande envoyée !", "success");
-      setTargetUsername("");
+      setTargetUserName("");
       await fetchFriendRequests(userId, true);
     } catch {
       showToast("Échec de l’envoi de la demande.", "error");
@@ -108,8 +108,8 @@ export default function FriendsPage() {
             type="text"
             placeholder="JohnDoe38"
             label="Nom d’utilisateur"
-            value={targetUsername}
-            onChange={(e) => setTargetUsername(e.target.value)}
+            value={targetUserName}
+            onChange={(e) => setTargetUserName(e.target.value)}
             disabled={loading}
             className="flex-1"
           />

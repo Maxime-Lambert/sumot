@@ -44,7 +44,7 @@ export default function Sumot() {
   const [hasTyped, setHasTyped] = useState(false);
   const { playsWithDifficultWords, keyboardLayout } = useSettingsStore();
   const navigate = useNavigate();
-  const infiniteParam = searchParams.has("infinite");
+  const infiniteParam = searchParams.get("infinite");
   const dayParam = searchParams.get("day");
 
   const isValidDateParam = (param: string) =>
@@ -111,8 +111,8 @@ export default function Sumot() {
           MinDate: match.day!,
           MaxDate: match.day!,
         });
-        const username = getUsernameFromToken(token);
-        const history = histories.find((h) => h.username === username);
+        const userName = getUsernameFromToken(token);
+        const history = histories.find((h) => h.userName === userName);
 
         if (history) {
           const guesses: Guess[] = history.tries.map((word) => ({

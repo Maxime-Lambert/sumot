@@ -5,7 +5,7 @@ export async function patchUser(
   patchUserRequest: PatchUserRequest
 ): Promise<void> {
   await axios.patch(`/users`, {
-    UserName: patchUserRequest.username,
+    UserName: patchUserRequest.userName,
     Email: patchUserRequest.email,
     Password: patchUserRequest.password,
     ColorblindMode: patchUserRequest.colorblindmode,
