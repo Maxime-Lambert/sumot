@@ -7,6 +7,7 @@ import { SmartKeyboardType } from "../../types/enums/KeyboardTypeEnum";
 import { useSettingsStore } from "@/hooks/useSettingStore";
 import { useGameStore } from "@/hooks/useGameStore";
 import type { Sumot } from "@/types/Sumot";
+import { useSearchParams } from "react-router-dom";
 
 const LAYOUTS: Record<KeyboardLayoutsEnum, string[][]> = {
   AZERTY: [
@@ -36,6 +37,8 @@ export default function Keyboard({ sumots }: KeyboardProps) {
   const { status, activeColIndex, guesses, inputKey } = useGameStore();
   const analyze = analyzeGuesses(guesses, keyboardType);
   const KEYS = LAYOUTS[keyboardLayout];
+  const [searchParams] = useSearchParams();
+  const infiniteParam = searchParams.get("infinite");
 
   const handleClick = (
     key: string,
@@ -50,7 +53,8 @@ export default function Keyboard({ sumots }: KeyboardProps) {
         : key.toUpperCase();
     inputKey(
       k,
-      sumots?.map((s) => s.word)
+      sumots?.map((s) => s.word),
+      infiniteParam !== null
     );
   };
 

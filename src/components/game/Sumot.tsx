@@ -146,12 +146,13 @@ export default function Sumot() {
     const onKeyDown = (e: KeyboardEvent) => {
       inputKey(
         e.key,
-        sumots.map((s) => s.word)
+        sumots.map((s) => s.word),
+        infiniteParam !== null
       );
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [inputKey, sumots]);
+  }, [inputKey, sumots, infiniteParam]);
 
   useEffect(() => {
     if (status === GameStates.REVEALING) {

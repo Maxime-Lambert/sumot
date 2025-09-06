@@ -21,7 +21,7 @@ interface GameState {
   setActiveColIndex: (i: number) => void;
   setStatus: (s: GameStatesEnum) => void;
   reset: (solution: Sumot) => void;
-  inputKey: (rawKey: string, sumots: string[]) => void;
+  inputKey: (rawKey: string, sumots: string[], infiniteMode: boolean) => void;
 }
 
 export const useGameStore = create<GameState>((set, get) => ({
@@ -47,7 +47,7 @@ export const useGameStore = create<GameState>((set, get) => ({
       solution,
     }),
 
-  inputKey: (rawKey: string, sumots: string[]) => {
+  inputKey: (rawKey: string, sumots: string[], infiniteMode: boolean) => {
     const {
       currentGuess,
       guesses,
@@ -107,11 +107,13 @@ export const useGameStore = create<GameState>((set, get) => ({
 
       const lastGuess = newGuesses.at(-1)!;
 
-      handleGameOver(
-        solution.word,
-        newGuesses.map((g) => g.word),
-        lastGuess.word === solution.word
-      );
+      if (!infiniteMode) {
+        handleGameOver(
+          solution.word,
+          newGuesses.map((g) => g.word),
+          lastGuess.word === solution.word
+        );
+      }
 
       setTimeout(() => {
         if (lastGuess.word === solution.word) {
