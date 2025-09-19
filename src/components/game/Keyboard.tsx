@@ -12,18 +12,18 @@ import { useSearchParams } from "react-router-dom";
 const LAYOUTS: Record<KeyboardLayoutsEnum, string[][]> = {
   AZERTY: [
     "A Z E R T Y U I O P".split(" "),
-    "Q S D F G H J K L M".split(" "),
-    ["Enter", ..."W X C V B N".split(" "), "Backspace"],
+    [..."Q S D F G H J K".split(" "), "Backspace"],
+    [..."L M W X C V B N".split(" "), "Enter"],
   ],
   QWERTY: [
     "Q W E R T Y U I O P".split(" "),
-    "A S D F G H J K L".split(" "),
-    ["Enter", ..."Z X C V B N M".split(" "), "Backspace"],
+    [..."A S D F G H J K".split(" "), "Backspace"],
+    [..."L Z X C V B N M".split(" "), "Enter"],
   ],
   QWERTZ: [
     "Q W E R T Z U I O P".split(" "),
-    "A S D F G H J K L".split(" "),
-    ["Enter", ..."Y X C V B N M".split(" "), "Backspace"],
+    [..."A S D F G H J K".split(" "), "Backspace"],
+    [..." L Y X C V B N M".split(" "), "Enter"],
   ],
   Hidden: [],
 };
@@ -116,7 +116,7 @@ export default function Keyboard({ sumots }: KeyboardProps) {
 
   return (
     <div
-      className="flex flex-col gap-[0.5rem] w-full max-w-[680px] px-2 sm:px-4 
+      className="flex flex-col gap-[0.5rem] w-full max-w-[680px]
                  items-center justify-center mx-auto"
     >
       {KEYS.map((row, rowIndex) => (
@@ -124,11 +124,7 @@ export default function Keyboard({ sumots }: KeyboardProps) {
           key={rowIndex}
           className="grid w-full gap-[0.4rem]"
           style={{
-            gridTemplateColumns: row
-              .map((key) =>
-                key === "Enter" || key === "Backspace" ? "1.5fr" : "1fr"
-              )
-              .join(" "),
+            gridTemplateColumns: row.map(() => "1fr").join(" "),
           }}
         >
           {row.map((key) => {
@@ -136,8 +132,10 @@ export default function Keyboard({ sumots }: KeyboardProps) {
               <button
                 type="button"
                 autoCorrect="off"
-                autoCapitalize="off"
-                spellCheck="false"
+                autoCapitalize="none"
+                spellCheck={false}
+                inputMode="none"
+                lang="fr"
                 key={key}
                 onClick={(e) => handleClick(key, e)}
                 className={clsx(
@@ -149,12 +147,16 @@ export default function Keyboard({ sumots }: KeyboardProps) {
                 {key === "Backspace" ? (
                   <>
                     <Delete className="w-5 h-5 sm:w-6 sm:h-6" />
-                    <p className="text-xs">Suppr</p>
+                    <p className="text-[0.625rem] sm:text-xs font-normal">
+                      Suppr
+                    </p>
                   </>
                 ) : key === "Enter" ? (
                   <>
                     <CornerDownLeft className="w-5 h-5 sm:w-6 sm:h-6" />
-                    <p className="text-xs">Entrée</p>
+                    <p className="text-[0.625rem] sm:text-xs font-normal">
+                      Entrée
+                    </p>
                   </>
                 ) : (
                   key

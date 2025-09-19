@@ -44,7 +44,9 @@ export function LetterCellBase({
     <div
       autoCorrect="off"
       autoCapitalize="off"
-      spellCheck="false"
+      spellCheck={false}
+      inputMode="none"
+      lang="fr"
       className={clsx(
         "flex items-center justify-center rounded border text-2xl font-bold aspect-square",
         getColorState(),
