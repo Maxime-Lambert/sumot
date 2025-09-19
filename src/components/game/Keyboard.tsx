@@ -117,7 +117,7 @@ export default function Keyboard({ sumots }: KeyboardProps) {
   return (
     <div
       className="flex flex-col gap-[0.5rem] w-full max-w-[680px]
-                 items-center justify-center mx-auto"
+                 items-center justify-center mx-auto select-none"
     >
       {KEYS.map((row, rowIndex) => (
         <div
@@ -136,6 +136,7 @@ export default function Keyboard({ sumots }: KeyboardProps) {
                 spellCheck={false}
                 inputMode="none"
                 lang="fr"
+                tabIndex={-1}
                 key={key}
                 onClick={(e) => handleClick(key, e)}
                 className={clsx(

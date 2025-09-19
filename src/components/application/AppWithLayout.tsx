@@ -37,8 +37,7 @@ export default function AppWithLayout() {
   const { fetchFriendRequests } = useFriendRequestsStore();
 
   useEffect(() => {
-    const token = localStorage.getItem("access_token");
-    if (!token) return;
+    if (!userId) return;
 
     let id: ReturnType<typeof setInterval>;
 

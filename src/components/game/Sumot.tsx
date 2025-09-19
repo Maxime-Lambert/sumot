@@ -99,7 +99,6 @@ export default function Sumot() {
       setSumots(loaded);
       reset(match);
 
-      // === 2. Charger historique ===
       if (infiniteParam) {
         setStatus(GameStates.PLAYING);
         return;
@@ -144,6 +143,7 @@ export default function Sumot() {
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
+      if (e.isComposing) e.preventDefault();
       inputKey(
         e.key,
         sumots.map((s) => s.word),
