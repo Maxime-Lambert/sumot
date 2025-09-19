@@ -48,7 +48,7 @@ export function LetterCellBase({
       inputMode="none"
       lang="fr"
       className={clsx(
-        "flex items-center justify-center rounded border text-2xl font-bold aspect-square",
+        "select-none flex items-center justify-center rounded border text-2xl font-bold aspect-square",
         getColorState(),
         isActive && "border-cell-border-select",
         error && "border-cell-border-error animate-shake",
