@@ -107,8 +107,8 @@ export default function Sumot() {
       const token = localStorage.getItem("access_token");
       if (token) {
         const histories = await getSumotHistories({
-          MinDate: match.day!,
-          MaxDate: match.day!,
+          startDate: match.day!,
+          endDate: match.day!,
         });
         const userName = getUsernameFromToken(token);
         const history = histories.find((h) => h.userName === userName);
@@ -245,7 +245,7 @@ export default function Sumot() {
           <p className="text-sm text-primary-container-foreground italic">
             {hasTyped
               ? ""
-              : "Tapes un mot puis valide avec Entrée pour commencer à jouer."}
+              : "Tape un mot puis valide avec Entrée pour commencer à jouer. Si tu souhaites comparer tes résultats, connecte-toi avant de jouer !"}
           </p>
 
           <div className="flex flex-col flex-1 w-[80%] max-w-[500px] mx-auto gap-2">

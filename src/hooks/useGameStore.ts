@@ -5,6 +5,8 @@ import type { Sumot } from "@/types/Sumot";
 import { evaluateGuess } from "@/services/EvaluateGuess";
 import { handleGameOver } from "@/services/SumotHistoryStorage";
 import { getCorrectLetterOrEmpty } from "@/services/GetCorrectLetterOrEmpty";
+import { addAttempt } from "@/api/sumots/addAttempt/AddAttempt";
+import { addFinish } from "@/api/sumots/addFinish/AddFinish";
 
 interface GameState {
   guesses: Guess[];
@@ -95,6 +97,12 @@ export const useGameStore = create<GameState>((set, get) => ({
           usedGuess = previewGuess;
         }
       }
+      if (guesses.length === 0) {
+        addAttempt({
+          date: solution.day!,
+          isMobile: false,
+        });
+      }
 
       const result = evaluateGuess(usedGuess, solution.word);
       const newGuesses = [...guesses, { word: usedGuess, result }];
@@ -108,6 +116,10 @@ export const useGameStore = create<GameState>((set, get) => ({
       const lastGuess = newGuesses.at(-1)!;
 
       if (!infiniteMode) {
+        addFinish({
+          date: solution.day!,
+          isMobile: false,
+        });
         handleGameOver(
           solution.word,
           newGuesses.map((g) => g.word),

@@ -5,13 +5,12 @@ import axios, {
   type AxiosResponse,
   type InternalAxiosRequestConfig,
 } from "axios";
-import { useNavigate } from "react-router-dom";
-import { logoutUser } from "./users/logout/Logout";
 
 const instance: AxiosInstance = axios.create({
   baseURL: "https://dailyquizapi.azurewebsites.net",
   withCredentials: true,
 });
+
 interface RefreshResponse {
   token: string;
 }
@@ -40,11 +39,49 @@ function onRefreshed(token: string) {
 }
 
 instance.interceptors.request.use(
-  (config: InternalAxiosRequestConfig): InternalAxiosRequestConfig => {
+  async (
+    config: InternalAxiosRequestConfig
+  ): Promise<InternalAxiosRequestConfig> => {
     const token = localStorage.getItem("access_token");
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+    const expires = localStorage.getItem("token_expires");
+
+    if (config.url?.includes("/users/refresh")) {
+      config.headers.Authorization = token ? `Bearer ${token}` : "";
+      config.headers["X-Client-Type"] = "SPA";
+      return config;
     }
+
+    if (token && expires) {
+      const expiresAt = parseInt(expires, 10);
+      const now = Date.now();
+
+      if (expiresAt - now < 60 * 1000) {
+        console.log("Refreshing token before request...");
+
+        try {
+          const { data } = await instance.post<RefreshResponse>(
+            "/users/refresh",
+            {},
+            { withCredentials: true }
+          );
+
+          localStorage.setItem("access_token", data.token);
+          localStorage.setItem(
+            "token_expires",
+            (Date.now() + 60 * 60 * 1000).toString()
+          );
+
+          config.headers.Authorization = `Bearer ${data.token}`;
+        } catch (err) {
+          console.log("raté donc logout", err);
+          window.location.href = "/logout";
+          throw err;
+        }
+      } else {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+    }
+
     config.headers["X-Client-Type"] = "SPA";
     return config;
   }
@@ -80,7 +117,10 @@ instance.interceptors.response.use(
 
         const newAccessToken = data.token;
         localStorage.setItem("access_token", newAccessToken);
-
+        localStorage.setItem(
+          "token_expires",
+          (Date.now() + 60 * 60 * 1000).toString()
+        );
         onRefreshed(newAccessToken);
 
         if (originalRequest.headers) {
@@ -89,10 +129,7 @@ instance.interceptors.response.use(
 
         return instance(originalRequest);
       } catch (refreshError) {
-        localStorage.removeItem("access_token");
-        await logoutUser();
-        const navigate = useNavigate();
-        navigate("/login");
+        window.location.href = "/logout";
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;

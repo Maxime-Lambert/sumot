@@ -73,8 +73,8 @@ export default function GameScorePanel({
         setUsername(getUsernameFromToken(token));
         try {
           const histories = await getSumotHistories({
-            MinDate: sumot.day!,
-            MaxDate: sumot.day!,
+            startDate: sumot.day!,
+            endDate: sumot.day!,
           });
 
           setData(

@@ -131,12 +131,7 @@ export default function Keyboard({ sumots }: KeyboardProps) {
             return (
               <button
                 type="button"
-                autoCorrect="off"
-                autoCapitalize="none"
-                spellCheck={false}
-                inputMode="none"
-                lang="fr"
-                tabIndex={-1}
+                translate="no"
                 key={key}
                 onClick={(e) => handleClick(key, e)}
                 className={clsx(
