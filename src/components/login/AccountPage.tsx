@@ -186,7 +186,7 @@ export default function AccountPage() {
           disabled={!editMode}
         />
 
-        {!emailConfirmed && (
+        {!emailConfirmed && userEmail && (
           <p className="text-xs text-primary-container-muted">
             Votre e-mail n'est toujours pas vérifié. Si vous souhaitez renvoyer
             un nouveau code de vérification,{" "}

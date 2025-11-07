@@ -23,6 +23,7 @@ import ForgotPasswordPage from "../login/ForgotPasswordPage";
 import ForgotUsernamePage from "../login/ForgotUsernamePage";
 import LogoutPage from "../login/LogoutPage";
 import { useFriendRequestsStore } from "@/hooks/useFriendRequestsStore";
+import { addVisit } from "@/api/sumots/addVisit/AddVisit";
 
 export default function AppWithLayout() {
   const [howToPlayModalOpen, setHowToPlayModalOpen] = useState(false);
@@ -37,6 +38,27 @@ export default function AppWithLayout() {
   const { fetchFriendRequests } = useFriendRequestsStore();
 
   useEffect(() => {
+    const userAnonId = localStorage.getItem("user_anon_id");
+    if (!userAnonId) {
+      localStorage.setItem("user_anon_id", crypto.randomUUID());
+    }
+    const lastDayVisit = localStorage.getItem("last_day_visit");
+    const today = new Date().toISOString().split("T")[0];
+    if (lastDayVisit) {
+      if (today !== lastDayVisit) {
+        localStorage.setItem("last_day_visit", today);
+        addVisit({
+          date: today,
+          isMobile: false,
+        });
+      }
+    } else {
+      localStorage.setItem("last_day_visit", today);
+      addVisit({
+        date: today,
+        isMobile: false,
+      });
+    }
     if (!userId) return;
 
     let id: ReturnType<typeof setInterval>;

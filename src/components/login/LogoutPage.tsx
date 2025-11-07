@@ -8,9 +8,15 @@ export default function LogoutPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    if (localStorage.getItem("access_token") === null) {
+      navigate("/");
+      return;
+    }
     async function logout() {
-      await logoutUser();
+      localStorage.removeItem("access_token");
+      localStorage.removeItem("token_expires");
       setUserId("");
+      await logoutUser();
       navigate("/");
     }
     logout();

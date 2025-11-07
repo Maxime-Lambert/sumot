@@ -12,5 +12,7 @@ export async function loginUser(
     ipAddress: loginUserRequest.ipAdress,
   });
   localStorage.setItem("access_token", response.data.token);
+  const expiresAt = Date.now() + 60 * 60 * 1000;
+  localStorage.setItem("token_expires", expiresAt.toString());
   return response;
 }

@@ -1,8 +1,8 @@
 import axios from "@/api/axios";
 
 export interface GetSumotHistoriesRequest {
-  MinDate?: string;
-  MaxDate?: string;
+  startDate?: string;
+  endDate?: string;
 }
 
 export interface GetSumotHistoriesResponse {

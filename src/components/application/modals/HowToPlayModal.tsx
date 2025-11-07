@@ -64,7 +64,7 @@ export default function HowToPlayModal({
             Il est possible de valider un mot simplement en remplissant les
             cases qui n'ont pas de preview.
           </p>
-          <DialogTitle className="text-center">Remerciements</DialogTitle>
+          <DialogTitle className="text-center">Mots autorisés</DialogTitle>
           <p>
             La base de données des mots provient de : Pallier, Christophe & New,
             Boris & Jessica Bourgin (2019) Openlexicon, GitHub repository&nbsp;
@@ -76,6 +76,13 @@ export default function HowToPlayModal({
             >
               https://github.com/chrplr/openlexicon
             </a>
+          </p>
+          <p>
+            Nous avons ensuite enlevé des mots que nous jugions offensants ou
+            dont la première définition extraite de wiktionnaire était
+            inappropriée. Si jamais vous trouvez un mot qui vous parait
+            inapproprié, ou bien si vous pensez qu'un mot devrait être ajouté au
+            lexique, n'hésitez pas à nous contacter (mail en bas de la page).
           </p>
         </div>
       </DialogContent>

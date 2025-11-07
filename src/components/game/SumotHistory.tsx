@@ -78,8 +78,8 @@ export function SumotHistory() {
     if (token) {
       const fetch = async () => {
         const histories = await getSumotHistories({
-          MinDate: minDate,
-          MaxDate: maxDate,
+          startDate: minDate,
+          endDate: maxDate,
         });
         const userName = getUsernameFromToken(token);
         const playerHistories = histories.filter(
