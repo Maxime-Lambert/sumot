@@ -57,7 +57,7 @@ export function updateBufferedSumotHistory(entry: LocalSumotHistory): void {
   saveBufferedSumotHistories(current);
 }
 
-export async function handleGameOver(
+export async function handleGuessHistory(
   word: string,
   tries: string[],
   won: boolean
