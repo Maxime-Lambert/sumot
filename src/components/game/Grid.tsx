@@ -10,6 +10,7 @@ export default function Grid() {
   const {
     guesses,
     currentGuess,
+    previewGuess,
     activeColIndex,
     maxAttempts,
     status,
@@ -30,7 +31,6 @@ export default function Grid() {
         const guess = guesses[rowIndex];
         const shouldAnimate =
           status === GameStates.REVEALING && rowIndex === guesses.length - 1;
-
         cell = (
           <LetterCellAnimated
             key={`${rowIndex}-${col}`}
@@ -42,8 +42,7 @@ export default function Grid() {
           />
         );
       } else if (isCurrentRow) {
-        const paddedGuess = currentGuess.padEnd(solution?.word.length, " ");
-        const char = paddedGuess[col];
+        const char = currentGuess[col];
         const letter =
           char === " " && status === GameStates.PLAYING
             ? getCorrectLetterOrEmpty(guesses, rowIndex, col)
@@ -57,7 +56,7 @@ export default function Grid() {
             isActive={col === activeColIndex && status === GameStates.PLAYING}
             error={
               status === GameStates.INVALID_GUESS &&
-              (char === " " || currentGuess.indexOf(" ") === -1)
+              (char === " " || previewGuess.length === 5)
             }
             preview={char === " "}
             column={col}

@@ -3,7 +3,7 @@ import { GameStates, type GameStatesEnum } from "@/types/enums/GameStateEnum";
 import type { Guess } from "@/types/Guess";
 import type { Sumot } from "@/types/Sumot";
 import { evaluateGuess } from "@/services/EvaluateGuess";
-import { handleGameOver } from "@/services/SumotHistoryStorage";
+import { handleGuessHistory } from "@/services/SumotHistoryStorage";
 import { getCorrectLetterOrEmpty } from "@/services/GetCorrectLetterOrEmpty";
 import { addAttempt } from "@/api/sumots/addAttempt/AddAttempt";
 import { addFinish } from "@/api/sumots/addFinish/AddFinish";
@@ -11,6 +11,7 @@ import { addFinish } from "@/api/sumots/addFinish/AddFinish";
 interface GameState {
   guesses: Guess[];
   currentGuess: string;
+  previewGuess: string;
   activeColIndex: number;
   status: GameStatesEnum;
   solution?: Sumot;
@@ -29,6 +30,7 @@ interface GameState {
 export const useGameStore = create<GameState>((set, get) => ({
   guesses: [],
   currentGuess: "",
+  previewGuess: "",
   activeColIndex: 0,
   solution: undefined,
   status: GameStates.LOADING,
@@ -45,6 +47,7 @@ export const useGameStore = create<GameState>((set, get) => ({
     set({
       guesses: [],
       currentGuess: "",
+      previewGuess: "",
       activeColIndex: 0,
       solution,
     }),
@@ -90,18 +93,13 @@ export const useGameStore = create<GameState>((set, get) => ({
         if (!previewGuessOk) {
           set({
             status: GameStates.INVALID_GUESS,
+            previewGuess: previewGuess,
           });
           setTimeout(() => set({ status: GameStates.PLAYING }), 500);
           return;
         } else {
           usedGuess = previewGuess;
         }
-      }
-      if (guesses.length === 0) {
-        addAttempt({
-          date: solution.day!,
-          isMobile: false,
-        });
       }
 
       const result = evaluateGuess(usedGuess, solution.word);
@@ -110,17 +108,20 @@ export const useGameStore = create<GameState>((set, get) => ({
       set({
         guesses: newGuesses,
         currentGuess: "",
+        previewGuess: "",
         status: GameStates.REVEALING,
       });
 
       const lastGuess = newGuesses.at(-1)!;
 
       if (!infiniteMode) {
-        addFinish({
-          date: solution.day!,
-          isMobile: false,
-        });
-        handleGameOver(
+        if (guesses.length === 0) {
+          addAttempt({
+            date: solution.day!,
+            isMobile: false,
+          });
+        }
+        handleGuessHistory(
           solution.word,
           newGuesses.map((g) => g.word),
           lastGuess.word === solution.word
@@ -130,8 +131,16 @@ export const useGameStore = create<GameState>((set, get) => ({
       setTimeout(() => {
         if (lastGuess.word === solution.word) {
           set({ status: GameStates.WON });
+          addFinish({
+            date: solution.day!,
+            isMobile: false,
+          });
         } else if (newGuesses.length >= maxAttempts) {
           set({ status: GameStates.LOST });
+          addFinish({
+            date: solution.day!,
+            isMobile: false,
+          });
         } else {
           set({ status: GameStates.PLAYING, activeColIndex: 0 });
         }
@@ -164,6 +173,14 @@ export const useGameStore = create<GameState>((set, get) => ({
       set({
         activeColIndex: Math.min(activeColIndex + 1, solution.word.length - 1),
       });
+      return;
+    }
+
+    if (key === "Delete") {
+      const padded = currentGuess.padEnd(solution.word.length, " ");
+      const chars = padded.split("");
+      chars[activeColIndex] = " ";
+      set({ currentGuess: chars.join("") });
       return;
     }
 
