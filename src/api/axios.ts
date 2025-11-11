@@ -56,8 +56,6 @@ instance.interceptors.request.use(
       const now = Date.now();
 
       if (expiresAt - now < 60 * 1000) {
-        console.log("Refreshing token before request...");
-
         try {
           const { data } = await instance.post<RefreshResponse>(
             "/users/refresh",
@@ -73,7 +71,6 @@ instance.interceptors.request.use(
 
           config.headers.Authorization = `Bearer ${data.token}`;
         } catch (err) {
-          console.log("raté donc logout", err);
           window.location.href = "/logout";
           throw err;
         }
