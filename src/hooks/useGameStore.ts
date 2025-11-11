@@ -131,16 +131,20 @@ export const useGameStore = create<GameState>((set, get) => ({
       setTimeout(() => {
         if (lastGuess.word === solution.word) {
           set({ status: GameStates.WON });
-          addFinish({
-            date: solution.day!,
-            isMobile: false,
-          });
+          if (!infiniteMode) {
+            addFinish({
+              date: solution.day!,
+              isMobile: false,
+            });
+          }
         } else if (newGuesses.length >= maxAttempts) {
           set({ status: GameStates.LOST });
-          addFinish({
-            date: solution.day!,
-            isMobile: false,
-          });
+          if (!infiniteMode) {
+            addFinish({
+              date: solution.day!,
+              isMobile: false,
+            });
+          }
         } else {
           set({ status: GameStates.PLAYING, activeColIndex: 0 });
         }
