@@ -1,7 +1,6 @@
 import axios from "@/api/axios";
 
 export interface AddVisitCommand {
-  date: string;
   isMobile: boolean;
 }
 

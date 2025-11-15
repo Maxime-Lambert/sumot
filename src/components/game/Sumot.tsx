@@ -232,7 +232,11 @@ export default function Sumot() {
       {isGameOver ? (
         <div className="flex flex-row items-center justify-center gap-4 w-full">
           <div className="sm:w-[360px]">
-            <GameScorePanel guesses={guesses} sumot={solution} />
+            <GameScorePanel
+              isGameOver={isGameOver}
+              guesses={guesses}
+              sumot={solution}
+            />
           </div>
           {!isSmallScreen && (
             <div className="sm:w-[360px]">

@@ -1,20 +1,14 @@
-import { showToast } from "@/services/ToastService";
 import axios, {
   AxiosError,
   type AxiosInstance,
   type AxiosResponse,
   type InternalAxiosRequestConfig,
 } from "axios";
+import { showToast } from "@/services/ToastService";
 
-const instance: AxiosInstance = axios.create({
-  baseURL: "https://dailyquizapi.azurewebsites.net",
-  withCredentials: true,
-});
-
-interface RefreshResponse {
-  token: string;
+interface RetryAxiosRequestConfig extends InternalAxiosRequestConfig {
+  _retry?: boolean;
 }
-
 interface ProblemDetails {
   title: string;
   status: number;
@@ -22,58 +16,74 @@ interface ProblemDetails {
   instance: string;
 }
 
-interface RetryAxiosRequestConfig extends InternalAxiosRequestConfig {
-  _retry?: boolean;
-}
+const API_URL = "https://dailyquizapi.azurewebsites.net";
+const ACCESS_KEY = "access_token";
+const EXP_KEY = "token_expires";
 
 let isRefreshing = false;
 let refreshSubscribers: Array<(token: string) => void> = [];
-
-function subscribeTokenRefresh(cb: (token: string) => void) {
-  refreshSubscribers.push(cb);
-}
 
 function onRefreshed(token: string) {
   refreshSubscribers.forEach((cb) => cb(token));
   refreshSubscribers = [];
 }
 
+function subscribeTokenRefresh(cb: (token: string) => void) {
+  refreshSubscribers.push(cb);
+}
+
+function getAccessToken() {
+  return localStorage.getItem(ACCESS_KEY);
+}
+
+function isTokenExpiringSoon(): boolean {
+  const exp = localStorage.getItem(EXP_KEY);
+  if (!exp) return true;
+  return parseInt(exp, 10) - Date.now() < 60_000;
+}
+
+async function refreshAccessToken(): Promise<string> {
+  const { data } = await axios.post<{ token: string }>(
+    `${API_URL}/users/refresh`,
+    {},
+    { withCredentials: true }
+  );
+
+  localStorage.setItem(ACCESS_KEY, data.token);
+  localStorage.setItem(EXP_KEY, (Date.now() + 60 * 60 * 1000).toString());
+  return data.token;
+}
+
+export const instance: AxiosInstance = axios.create({
+  baseURL: API_URL,
+  withCredentials: true,
+});
+
 instance.interceptors.request.use(
-  async (
-    config: InternalAxiosRequestConfig
-  ): Promise<InternalAxiosRequestConfig> => {
-    const token = localStorage.getItem("access_token");
-    const expires = localStorage.getItem("token_expires");
+  async (config: InternalAxiosRequestConfig) => {
+    const token = getAccessToken();
 
-    if (config.url?.includes("/users/refresh")) {
-      config.headers.Authorization = token ? `Bearer ${token}` : "";
-      config.headers["X-Client-Type"] = "SPA";
-      return config;
-    }
+    if (config.url?.includes("/users/refresh")) return config;
 
-    if (token && expires) {
-      const expiresAt = parseInt(expires, 10);
-      const now = Date.now();
-
-      if (expiresAt - now < 60 * 1000) {
-        try {
-          const { data } = await instance.post<RefreshResponse>(
-            "/users/refresh",
-            {},
-            { withCredentials: true }
-          );
-
-          localStorage.setItem("access_token", data.token);
-          localStorage.setItem(
-            "token_expires",
-            (Date.now() + 60 * 60 * 1000).toString()
-          );
-
-          config.headers.Authorization = `Bearer ${data.token}`;
-        } catch (err) {
-          window.location.href = "/logout";
-          throw err;
+    if (token) {
+      if (isTokenExpiringSoon()) {
+        if (!isRefreshing) {
+          isRefreshing = true;
+          try {
+            const newToken = await refreshAccessToken();
+            onRefreshed(newToken);
+          } catch {
+            window.location.href = "/logout";
+            throw new Error("Session expirée");
+          } finally {
+            isRefreshing = false;
+          }
         }
+
+        const newToken = await new Promise<string>((resolve) => {
+          subscribeTokenRefresh(resolve);
+        });
+        config.headers.Authorization = `Bearer ${newToken}`;
       } else {
         config.headers.Authorization = `Bearer ${token}`;
       }
@@ -85,56 +95,27 @@ instance.interceptors.request.use(
 );
 
 instance.interceptors.response.use(
-  (response: AxiosResponse): AxiosResponse => response,
-  async (error: AxiosError): Promise<AxiosResponse | never> => {
+  (res: AxiosResponse) => res,
+  async (error: AxiosError) => {
+    const originalRequest = error.config;
     const problem = error.response?.data as ProblemDetails;
-    const originalRequest = error.config as RetryAxiosRequestConfig;
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
-      if (isRefreshing) {
-        return new Promise((resolve) => {
-          subscribeTokenRefresh((token: string) => {
-            if (originalRequest.headers) {
-              originalRequest.headers.Authorization = `Bearer ${token}`;
-            }
-            resolve(instance(originalRequest));
-          });
-        });
-      }
-
-      originalRequest._retry = true;
-      isRefreshing = true;
+    if (
+      error.response?.status === 401 &&
+      originalRequest &&
+      !(originalRequest as RetryAxiosRequestConfig)._retry
+    ) {
+      (originalRequest as RetryAxiosRequestConfig)._retry = true;
 
       try {
-        const { data } = await axios.post<RefreshResponse>(
-          "https://dailyquizapi.azurewebsites.net/users/refresh",
-          {},
-          { withCredentials: true }
-        );
-
-        const newAccessToken = data.token;
-        localStorage.setItem("access_token", newAccessToken);
-        localStorage.setItem(
-          "token_expires",
-          (Date.now() + 60 * 60 * 1000).toString()
-        );
-        onRefreshed(newAccessToken);
-
-        if (originalRequest.headers) {
-          originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
-        }
-
+        await refreshAccessToken();
         return instance(originalRequest);
-      } catch (refreshError) {
+      } catch {
         window.location.href = "/logout";
-        return Promise.reject(refreshError);
-      } finally {
-        isRefreshing = false;
       }
-    } else {
-      showToast(problem?.detail || "Une erreur est survenue", "error");
     }
 
+    showToast(problem.detail || "Une erreur est survenue", "error");
     return Promise.reject(error);
   }
 );

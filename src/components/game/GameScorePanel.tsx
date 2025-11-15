@@ -25,6 +25,7 @@ import { Separator } from "../ui/separator";
 interface GameScorePanelProps {
   sumot?: Sumot;
   guesses?: Guess[];
+  isGameOver?: boolean;
 }
 
 interface ScoreEntry {
@@ -38,6 +39,7 @@ interface ScoreEntry {
 export default function GameScorePanel({
   sumot,
   guesses,
+  isGameOver,
 }: GameScorePanelProps) {
   const [data, setData] = useState<ScoreEntry[]>([]);
   const [userName, setUsername] = useState<string | null>(null);
@@ -48,7 +50,7 @@ export default function GameScorePanel({
   const token = localStorage.getItem("access_token");
 
   useEffect(() => {
-    if (!sumot) return;
+    if (!sumot || !isGameOver) return;
     const fetch = async () => {
       if (infiniteMode) {
         setData([
@@ -118,7 +120,7 @@ export default function GameScorePanel({
     void fetch();
   }, [sumot, infiniteMode, guesses, token]);
 
-  if (!sumot) return null;
+  if (!sumot || !isGameOver) return null;
 
   if (loading) {
     return <LoadingScreen />;
