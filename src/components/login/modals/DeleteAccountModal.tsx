@@ -29,9 +29,7 @@ export default function DeleteAccountModal({
     setLoading(true);
     try {
       await deleteUser({ password });
-      localStorage.removeItem("access_token");
-      localStorage.removeItem("refresh_token");
-      navigate("/");
+      navigate("/logout");
     } catch (err: unknown) {
       let message = "Erreur : échec de la suppression.";
 

@@ -48,14 +48,12 @@ export default function AppWithLayout() {
       if (today !== lastDayVisit) {
         localStorage.setItem("last_day_visit", today);
         addVisit({
-          date: today,
           isMobile: false,
         });
       }
     } else {
       localStorage.setItem("last_day_visit", today);
       addVisit({
-        date: today,
         isMobile: false,
       });
     }
