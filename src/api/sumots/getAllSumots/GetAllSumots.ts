@@ -2,6 +2,7 @@ import axios from "../../axios";
 import type { Sumot } from "../../../types/Sumot";
 import type { SumotResponse } from "./SumotResponse";
 import { getItem, setItem } from "@/services/Storage";
+import { addVisit } from "../addVisit/AddVisit";
 
 const STORAGE_SUMOTS_KEY = "sumots:all";
 const STORAGE_UPDATE_DATE_KEY = "sumots:lastUpdate";
@@ -48,6 +49,7 @@ export async function updateSumotsFromDate(): Promise<Sumot[]> {
 
   await setItem(STORAGE_SUMOTS_KEY, JSON.stringify(newList));
   if (updates.length > 0) {
+    await addVisit({ isMobile: false });
     await setItem(STORAGE_UPDATE_DATE_KEY, new Date().toISOString());
   }
 

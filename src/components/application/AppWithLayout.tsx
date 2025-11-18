@@ -23,7 +23,7 @@ import ForgotPasswordPage from "../login/ForgotPasswordPage";
 import ForgotUsernamePage from "../login/ForgotUsernamePage";
 import LogoutPage from "../login/LogoutPage";
 import { useFriendRequestsStore } from "@/hooks/useFriendRequestsStore";
-import { addVisit } from "@/api/sumots/addVisit/AddVisit";
+import StatsPage from "./StatsPage";
 
 export default function AppWithLayout() {
   const [howToPlayModalOpen, setHowToPlayModalOpen] = useState(false);
@@ -41,21 +41,6 @@ export default function AppWithLayout() {
     const userAnonId = localStorage.getItem("user_anon_id");
     if (!userAnonId) {
       localStorage.setItem("user_anon_id", crypto.randomUUID());
-    }
-    const lastDayVisit = localStorage.getItem("last_day_visit");
-    const today = new Date().toISOString().split("T")[0];
-    if (lastDayVisit) {
-      if (today !== lastDayVisit) {
-        localStorage.setItem("last_day_visit", today);
-        addVisit({
-          isMobile: false,
-        });
-      }
-    } else {
-      localStorage.setItem("last_day_visit", today);
-      addVisit({
-        isMobile: false,
-      });
     }
     if (!userId) return;
 
@@ -113,6 +98,7 @@ export default function AppWithLayout() {
         <Route path="/history" element={<SumotHistory />} />
         <Route path="/forgotpassword" element={<ForgotPasswordPage />} />
         <Route path="/forgotusername" element={<ForgotUsernamePage />} />
+        <Route path="/stats" element={<StatsPage />} />
         <Route path="*" element={<div className="p-4">404 Not Found</div>} />
       </Routes>
 
