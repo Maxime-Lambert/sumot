@@ -52,7 +52,7 @@ export default function AppWithLayout() {
       setKeyboardLayout(user.keyboardLayout);
       setKeyboardType(user.smartKeyboardType);
       await fetchFriendRequests(userId, true);
-      id = setInterval(() => fetchFriendRequests(userId, false), 60000);
+      id = setInterval(() => fetchFriendRequests(userId, false), 600000);
     }
 
     void init();
