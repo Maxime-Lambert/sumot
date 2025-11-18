@@ -42,7 +42,8 @@ export default function Grid() {
           />
         );
       } else if (isCurrentRow) {
-        const char = currentGuess[col];
+        const padded = currentGuess.padEnd(solution.word.length, " ");
+        const char = padded[col];
         const letter =
           char === " " && status === GameStates.PLAYING
             ? getCorrectLetterOrEmpty(guesses, rowIndex, col)
