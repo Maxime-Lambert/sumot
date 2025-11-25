@@ -14,6 +14,7 @@ import {
   TooltipTrigger,
 } from "../ui/tooltip";
 import { Info } from "lucide-react";
+import { validatePassword } from "@/services/ValidatePassword";
 
 export default function CreateAccountPage() {
   const [form, setForm] = useState({
@@ -34,22 +35,6 @@ export default function CreateAccountPage() {
       ...prev,
       [name]: type === "checkbox" ? checked : value,
     }));
-  };
-
-  const validatePassword = (password: string): string | null => {
-    if (password.length < 6) {
-      return "Le mot de passe doit contenir au moins 6 caractères.";
-    }
-    if (!/[A-Z]/.test(password)) {
-      return "Le mot de passe doit contenir au moins une majuscule.";
-    }
-    if (!/[0-9]/.test(password)) {
-      return "Le mot de passe doit contenir au moins un chiffre.";
-    }
-    if (!/[^a-zA-Z0-9]/.test(password)) {
-      return "Le mot de passe doit contenir au moins un caractère spécial.";
-    }
-    return null;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -158,7 +143,7 @@ export default function CreateAccountPage() {
                   className="bg-primary-container text-primary-container-foreground max-w-xs break-words"
                 >
                   <ul className="list-disc list-inside text-sm">
-                    <li>6 à 20 caractères</li>
+                    <li>8 à 20 caractères</li>
                     <li>Au moins une majuscule</li>
                     <li>Au moins une minuscule</li>
                     <li>Au moins un chiffre</li>

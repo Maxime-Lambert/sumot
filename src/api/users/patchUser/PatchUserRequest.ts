@@ -1,8 +1,8 @@
 export interface PatchUserRequest {
   userName?: string;
   email?: string;
-  lastpassword?: string;
-  password?: string;
+  lastPassword?: string;
+  newPassword?: string;
   colorblindmode?: number;
   smartkeyboardtype?: number;
   keyboardlayout?: number;

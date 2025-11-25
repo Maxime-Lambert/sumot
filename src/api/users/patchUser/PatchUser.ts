@@ -7,7 +7,8 @@ export async function patchUser(
   await axios.patch(`/users`, {
     UserName: patchUserRequest.userName,
     Email: patchUserRequest.email,
-    Password: patchUserRequest.password,
+    LastPassword: patchUserRequest.lastPassword,
+    NewPassword: patchUserRequest.newPassword,
     ColorblindMode: patchUserRequest.colorblindmode,
     SmartKeyboardType: patchUserRequest.smartkeyboardtype,
     KeyboardLayout: patchUserRequest.keyboardlayout,

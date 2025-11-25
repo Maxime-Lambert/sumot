@@ -2,18 +2,6 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getUserIdFromToken } from "@/services/GetUserIdFromToken";
 import type { PatchUserRequest } from "@/api/users/patchUser/PatchUserRequest";
-import {
-  ColorBlindModes,
-  ColorBlindModeApiMap,
-} from "@/types/enums/ColorBlindModeEnum";
-import {
-  KeyboardLayouts,
-  KeyboardLayoutsApiMap,
-} from "@/types/enums/KeyboardLayoutsEnum";
-import {
-  SmartKeyboardType,
-  SmartKeyboardTypeApiMap,
-} from "@/types/enums/KeyboardTypeEnum";
 import { getUser } from "@/api/users/getUser/GetUser";
 import { patchUser } from "@/api/users/patchUser/PatchUser";
 import { Button } from "@/components/ui/button";
@@ -29,20 +17,30 @@ import { ThemedButton } from "../ui/themed/button";
 import { exportData } from "@/api/users/exportData/ExportData";
 import { showToast } from "@/services/ToastService";
 import LoadingScreen from "../game/LoadingScreen";
+import { validatePassword } from "@/services/ValidatePassword";
 
 export default function AccountPage() {
   const navigate = useNavigate();
   const token = localStorage.getItem("access_token");
+
   const [loading, setLoading] = useState(true);
+
+  // Valeurs affichées / modifiables
   const [user, setUser] = useState<PatchUserRequest>({
     userName: "",
     email: "",
-    password: "",
-    lastpassword: "",
-    colorblindmode: ColorBlindModeApiMap[ColorBlindModes.None],
-    keyboardlayout: KeyboardLayoutsApiMap[KeyboardLayouts.AZERTY],
-    smartkeyboardtype: SmartKeyboardTypeApiMap[SmartKeyboardType.None],
+    lastPassword: "",
+    newPassword: "",
   });
+
+  // Valeurs initiales pour détecter les changements
+  const [initialUser, setInitialUser] = useState<PatchUserRequest>({
+    userName: "",
+    email: "",
+    lastPassword: "",
+    newPassword: "",
+  });
+
   const [userEmail, setUserEmail] = useState("");
   const [openDelete, setOpenDelete] = useState(false);
   const [editMode, setEditMode] = useState(false);
@@ -60,57 +58,102 @@ export default function AccountPage() {
         navigate("/login");
         return;
       }
-      const user = await getUser();
-      setUser({
-        userName: user.userName,
-        email: user.email,
-        lastpassword: "",
-        password: "",
-        colorblindmode: ColorBlindModeApiMap[user.colorblindMode],
-        keyboardlayout: KeyboardLayoutsApiMap[user.keyboardLayout],
-        smartkeyboardtype: SmartKeyboardTypeApiMap[user.smartKeyboardType],
-      });
-      setUserEmail(user.email);
-      setEmailConfirmed(user.emailConfirmed);
+
+      const u = await getUser();
+
+      const loaded = {
+        userName: u.userName,
+        email: u.email,
+        lastPassword: "",
+        newPassword: "",
+      };
+
+      setUser(loaded);
+      setInitialUser(loaded);
+      setUserEmail(u.email);
+      setEmailConfirmed(u.emailConfirmed);
       setLoading(false);
     };
 
     void fetchUser();
   }, [navigate, token]);
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    const { name, value, type } = e.target;
-    const checked = (e.target as HTMLInputElement).checked;
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
 
     setUser((prev) => ({
       ...prev,
-      [name]: type === "checkbox" ? checked : value,
+      [name]: value,
     }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await patchUser(user);
-    setEditMode(false);
+
+    if (user.newPassword) {
+      const pwdError = validatePassword(user.newPassword);
+      if (pwdError) {
+        showToast(pwdError, "error");
+        return;
+      }
+    }
+
+    if (user.lastPassword) {
+      const pwdError = validatePassword(user.lastPassword);
+      if (pwdError) {
+        showToast(pwdError, "error");
+        return;
+      }
+    }
+
+    const patch: Partial<PatchUserRequest> = {};
+
+    const isPasswordEdited =
+      user.lastPassword?.trim() !== "" || user.newPassword?.trim() !== "";
+
+    if (isPasswordEdited) {
+      patch.lastPassword = user.lastPassword;
+      patch.newPassword = user.newPassword;
+    }
+
+    if (user.userName !== initialUser.userName) patch.userName = user.userName;
+
+    if (user.email !== initialUser.email) patch.email = user.email;
+
+    if (Object.keys(patch).length === 0) {
+      showToast("Aucune modification détectée.", "info");
+      setEditMode(false);
+      return;
+    }
+
+    await patchUser(patch);
+
     showToast("Modifications enregistrées.", "success");
+    setEditMode(false);
+
+    setInitialUser({
+      ...initialUser,
+      ...patch,
+      lastPassword: "",
+      newPassword: "",
+    });
+
+    setUser((prev) => ({
+      ...prev,
+      lastPassword: "",
+      newPassword: "",
+    }));
   };
 
-  if (loading) {
-    return <LoadingScreen />;
-  }
+  if (loading) return <LoadingScreen />;
 
-  async function handleResend() {
-    await resendConfirmation({
-      email: userEmail,
-      frontEndName: 0,
-    });
-  }
+  const handleResend = async () => {
+    await resendConfirmation({ email: userEmail, frontEndName: 0 });
+  };
 
-  async function handleExport() {
+  const handleExport = async () => {
     await exportData();
-  }
+  };
 
   return (
     <form
@@ -135,11 +178,7 @@ export default function AccountPage() {
         <div className="flex-1 flex items-center justify-end">
           <DropdownMenu>
             <ThemedDropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-auto w-auto p-0 focus:border-none"
-              >
+              <Button variant="ghost" size="icon" className="h-auto w-auto p-0">
                 <MoreVertical className="h-5 w-5" />
               </Button>
             </ThemedDropdownMenuTrigger>
@@ -153,6 +192,7 @@ export default function AccountPage() {
                 <Download className="mr-2 h-4 w-4" />
                 Exporter mes données
               </ThemedDropdownMenuItem>
+
               <ThemedDropdownMenuItem
                 className="bg-primary-container-error/70 focus:bg-primary-container-error hover:bg-primary-container-error"
                 onClick={() => setOpenDelete(true)}
@@ -180,7 +220,6 @@ export default function AccountPage() {
           name="email"
           type="email"
           label="Adresse e-mail"
-          className="flex-grow"
           value={user.email}
           onChange={handleChange}
           disabled={!editMode}
@@ -188,16 +227,15 @@ export default function AccountPage() {
 
         {!emailConfirmed && userEmail && (
           <p className="text-xs text-primary-container-muted">
-            Votre e-mail n'est toujours pas vérifié. Si vous souhaitez renvoyer
-            un nouveau code de vérification,{" "}
+            Votre e-mail n'est pas vérifié.{" "}
             <button
               type="button"
               onClick={handleResend}
               className="underline hover:text-primary-container-muted/80"
             >
-              cliquez ici
-            </button>
-            .
+              Cliquez ici
+            </button>{" "}
+            pour renvoyer un code.
           </p>
         )}
       </div>
@@ -205,30 +243,28 @@ export default function AccountPage() {
       {editMode && (
         <>
           <ThemedInput
-            id="lastpassword"
-            name="lastpassword"
+            id="lastPassword"
+            name="lastPassword"
             type="password"
             label="Ancien mot de passe"
-            value={user.lastpassword}
+            value={user.lastPassword}
             onChange={handleChange}
-            disabled={!editMode}
           />
 
           <ThemedInput
-            id="password"
-            name="password"
+            id="newPassword"
+            name="newPassword"
             type="password"
             label="Nouveau mot de passe"
-            value={user.password}
+            value={user.newPassword}
             onChange={handleChange}
-            disabled={!editMode}
           />
         </>
       )}
 
       {editMode && (
         <div className="flex sm:flex-row justify-end">
-          <ThemedButton icon={Save} type="button" onClick={handleSubmit}>
+          <ThemedButton icon={Save} type="submit">
             Enregistrer
           </ThemedButton>
         </div>
