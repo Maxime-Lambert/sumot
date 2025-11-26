@@ -64,6 +64,7 @@ instance.interceptors.request.use(
     const token = getAccessToken();
 
     if (config.url?.includes("/users/refresh")) return config;
+    if (config.url?.includes("/users/logout")) return config;
 
     if (token) {
       if (isTokenExpiringSoon()) {
@@ -98,6 +99,9 @@ instance.interceptors.response.use(
   (res: AxiosResponse) => res,
   async (error: AxiosError) => {
     const originalRequest = error.config;
+    if (originalRequest?.url?.includes("/users/logout")) {
+      return Promise.reject(error);
+    }
     const problem = error.response?.data as ProblemDetails;
 
     if (

@@ -13,6 +13,10 @@ export default function LogoutPage() {
     if (done.current) return;
     done.current = true;
 
+    if (localStorage.getItem("access_token") === null) {
+      navigate("/", { replace: true });
+    }
+
     (async () => {
       await logoutUser();
       localStorage.removeItem("access_token");
