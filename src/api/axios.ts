@@ -64,6 +64,11 @@ instance.interceptors.request.use(
     const token = getAccessToken();
 
     if (config.url?.includes("/users/refresh")) return config;
+    if (config.url?.includes("/users/logout")) {
+      config.headers["X-Client-Type"] = "SPA";
+      config.headers.Authorization = `Bearer ${token}`;
+      return config;
+    }
 
     if (token) {
       if (isTokenExpiringSoon()) {
@@ -98,9 +103,6 @@ instance.interceptors.response.use(
   (res: AxiosResponse) => res,
   async (error: AxiosError) => {
     const originalRequest = error.config;
-    if (originalRequest?.url?.includes("/users/logout")) {
-      return Promise.reject(error);
-    }
     const problem = error.response?.data as ProblemDetails;
 
     if (
@@ -109,6 +111,10 @@ instance.interceptors.response.use(
       !(originalRequest as RetryAxiosRequestConfig)._retry
     ) {
       (originalRequest as RetryAxiosRequestConfig)._retry = true;
+
+      if (originalRequest?.url?.includes("/users/logout")) {
+        return Promise.reject(error);
+      }
 
       try {
         await refreshAccessToken();
