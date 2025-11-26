@@ -15,10 +15,15 @@ export default function LogoutPage() {
 
     if (localStorage.getItem("access_token") === null) {
       navigate("/", { replace: true });
+      return;
     }
 
     (async () => {
-      await logoutUser();
+      try {
+        await logoutUser();
+      } catch {
+        // on ignore, aucun retry, aucun refresh, rien
+      }
       localStorage.removeItem("access_token");
       localStorage.removeItem("token_expires");
       setUserId("");
