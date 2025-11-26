@@ -64,7 +64,6 @@ instance.interceptors.request.use(
     const token = getAccessToken();
 
     if (config.url?.includes("/users/refresh")) return config;
-    if (config.url?.includes("/users/logout")) return config;
 
     if (token) {
       if (isTokenExpiringSoon()) {
