@@ -1,4 +1,4 @@
-import { updateSumotHistories } from "@/api/sumots/addSumotHistories/UpdateSumotHistories";
+import { updateSumotHistories } from "@/api/sumots/updateSumotHistories/UpdateSumotHistories";
 
 export interface LocalSumotHistory {
   word: string;
@@ -67,7 +67,7 @@ export async function handleGuessHistory(
   const history = { word, tries, won };
 
   if (token) {
-    await updateSumotHistories({ histories: [history] });
+    await updateSumotHistories({ histories: [history], overwrite: true });
   } else {
     upsertBufferedSumotHistory(history);
   }
@@ -77,6 +77,6 @@ export async function flushBufferedHistoriesIfAny() {
   const buffered = getBufferedSumotHistories();
   if (buffered.length === 0) return;
 
-  await updateSumotHistories({ histories: buffered });
+  await updateSumotHistories({ histories: buffered, overwrite: false });
   clearBufferedSumotHistories();
 }
