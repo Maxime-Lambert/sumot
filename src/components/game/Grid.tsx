@@ -57,7 +57,7 @@ export default function Grid() {
             isActive={col === activeColIndex && status === GameStates.PLAYING}
             error={
               status === GameStates.INVALID_GUESS &&
-              (char === " " || previewGuess.length === 5)
+              (char === " " || previewGuess.length === solution.word.length)
             }
             preview={char === " "}
             column={col}

@@ -40,7 +40,7 @@ export default function Header({ onOpenHelp, onOpenSettings }: HeaderProps) {
           </button>
         </div>
 
-        <div className="flex-1 flex justify-end gap-1 sm:gap-3 items-center">
+        <div className="flex-1 flex justify-end gap-2.5 sm:gap-3 items-center">
           <Button
             variant="ghost"
             size="icon"
@@ -48,7 +48,7 @@ export default function Header({ onOpenHelp, onOpenSettings }: HeaderProps) {
             aria-label="Aide"
             className="w-4 h-4 sm:w-7 sm:h-7 flex items-center justify-center hover:bg-secondary-muted rounded-md transition"
           >
-            <HelpCircle className="!w-4 !h-4 sm:!w-7 sm:!h-7" />
+            <HelpCircle className="!w-5 !h-5 sm:!w-7 sm:!h-7" />
           </Button>
 
           <Button
@@ -58,7 +58,7 @@ export default function Header({ onOpenHelp, onOpenSettings }: HeaderProps) {
             aria-label="Paramètres"
             className="w-4 h-4 sm:w-7 sm:h-7 flex items-center justify-center hover:bg-secondary-muted rounded-md transition"
           >
-            <Settings className="!w-4 !h-4 sm:!w-7 sm:!h-7" />
+            <Settings className="!w-5 !h-5 sm:!w-7 sm:!h-7" />
           </Button>
 
           <Button
@@ -68,7 +68,7 @@ export default function Header({ onOpenHelp, onOpenSettings }: HeaderProps) {
             aria-label="Historique"
             className="w-4 h-4 sm:w-7 sm:h-7 flex items-center justify-center hover:bg-secondary-muted rounded-md transition"
           >
-            <Calendar1 className="!w-4 !h-4 sm:!w-7 sm:!h-7" />
+            <Calendar1 className="!w-5 !h-5 sm:!w-7 sm:!h-7" />
           </Button>
 
           {userId && (
@@ -79,7 +79,7 @@ export default function Header({ onOpenHelp, onOpenSettings }: HeaderProps) {
                   size="icon"
                   className="w-4 h-4 sm:w-7 sm:h-7 p-0 items-center justify-center hover:bg-secondary-muted rounded-md transition inline-flex"
                 >
-                  <User className="!w-4 !h-4 sm:!w-7 sm:!h-7" />
+                  <User className="!w-5 !h-5 sm:!w-7 sm:!h-7" />
                 </Button>
               </ThemedDropdownMenuTrigger>
               <ThemedDropdownMenuContent
@@ -110,7 +110,7 @@ export default function Header({ onOpenHelp, onOpenSettings }: HeaderProps) {
               aria-label="Connecter"
               className="relative w-4 h-4 sm:w-7 sm:h-7 flex items-center justify-center hover:bg-secondary-muted rounded-md transition"
             >
-              <User className="!w-4 !h-4 sm:!w-7 sm:!h-7" />
+              <User className="!w-5 !h-5 sm:!w-7 sm:!h-7" />
             </Button>
           )}
 
@@ -122,7 +122,7 @@ export default function Header({ onOpenHelp, onOpenSettings }: HeaderProps) {
               aria-label="Amis"
               className="relative w-4 h-4 sm:w-7 sm:h-7 flex items-center justify-center hover:bg-secondary-muted rounded-md transition"
             >
-              <Users className="!w-4 !h-4 sm:!w-7 sm:!h-7" />
+              <Users className="!w-5 !h-5 sm:!w-7 sm:!h-7" />
               {receivedCount > 0 && (
                 <span className="absolute -bottom-1 -right-1 text-[10px] sm:text-xs bg-primary text-white rounded-full px-[5px] py-[1px] shadow">
                   {receivedCount}
