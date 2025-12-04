@@ -126,7 +126,7 @@ export default function DeleteAccountPage() {
         Supprimer mon compte
       </h2>
 
-      <p className="text-sm text-primary-container-muted">
+      <p className="text-sm text-primary-container-muted mb-1">
         Cette action est <strong>définitive</strong> et entraînera la perte de
         toutes vos données. Pour confirmer, entrez votre mot de passe.
       </p>
@@ -139,15 +139,17 @@ export default function DeleteAccountPage() {
         required
       />
 
-      <Button
-        variant="destructive"
-        onClick={handleDelete}
-        disabled={loading}
-        className="w-full sm:w-auto bg-primary-container-error hover:bg-primary-container-error/80"
-      >
-        {loading && <Loader2 className="animate-spin w-4 h-4 mr-2" />}
-        Supprimer
-      </Button>
+      <div className="flex flex-col items-center mt-4 gap-2">
+        <Button
+          variant="destructive"
+          onClick={handleDelete}
+          disabled={loading}
+          className="w-full sm:w-auto center bg-primary-container-error hover:bg-primary-container-error/80"
+        >
+          {loading && <Loader2 className="animate-spin w-4 h-4 mr-2" />}
+          Supprimer
+        </Button>
+      </div>
     </div>
   );
 }
