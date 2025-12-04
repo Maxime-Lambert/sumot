@@ -8,6 +8,7 @@ export interface UpdateSumotHistoryCommand {
 
 export interface UpdateSumotHistoriesRequest {
   histories: UpdateSumotHistoryCommand[];
+  overwrite: boolean;
 }
 
 export type UpdateSumotHistoriesResponse = void;

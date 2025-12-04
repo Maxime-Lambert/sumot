@@ -21,13 +21,12 @@ export default function LogoutPage() {
     (async () => {
       try {
         await logoutUser();
-      } catch {
-        // on ignore, aucun retry, aucun refresh, rien
+      } finally {
+        localStorage.removeItem("access_token");
+        localStorage.removeItem("token_expires");
+        setUserId("");
+        navigate("/", { replace: true });
       }
-      localStorage.removeItem("access_token");
-      localStorage.removeItem("token_expires");
-      setUserId("");
-      navigate("/", { replace: true });
     })();
   }, [navigate, setUserId]);
 

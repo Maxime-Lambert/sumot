@@ -6,9 +6,6 @@ import axios, {
 } from "axios";
 import { showToast } from "@/services/ToastService";
 
-interface RetryAxiosRequestConfig extends InternalAxiosRequestConfig {
-  _retry?: boolean;
-}
 interface ProblemDetails {
   title: string;
   status: number;
@@ -62,13 +59,10 @@ export const instance: AxiosInstance = axios.create({
 instance.interceptors.request.use(
   async (config: InternalAxiosRequestConfig) => {
     const token = getAccessToken();
+    const spaType = "SPA";
+    config.headers["X-Client-Type"] = spaType;
 
     if (config.url?.includes("/users/refresh")) return config;
-    if (config.url?.includes("/users/logout")) {
-      config.headers["X-Client-Type"] = "SPA";
-      config.headers.Authorization = `Bearer ${token}`;
-      return config;
-    }
 
     if (token) {
       if (isTokenExpiringSoon()) {
@@ -94,7 +88,6 @@ instance.interceptors.request.use(
       }
     }
 
-    config.headers["X-Client-Type"] = "SPA";
     return config;
   }
 );
@@ -102,28 +95,7 @@ instance.interceptors.request.use(
 instance.interceptors.response.use(
   (res: AxiosResponse) => res,
   async (error: AxiosError) => {
-    const originalRequest = error.config;
     const problem = error.response?.data as ProblemDetails;
-
-    if (
-      error.response?.status === 401 &&
-      originalRequest &&
-      !(originalRequest as RetryAxiosRequestConfig)._retry
-    ) {
-      (originalRequest as RetryAxiosRequestConfig)._retry = true;
-
-      if (originalRequest?.url?.includes("/users/logout")) {
-        return Promise.reject(error);
-      }
-
-      try {
-        await refreshAccessToken();
-        return instance(originalRequest);
-      } catch {
-        window.location.href = "/logout";
-      }
-    }
-
     showToast(problem.detail || "Une erreur est survenue", "error");
     return Promise.reject(error);
   }

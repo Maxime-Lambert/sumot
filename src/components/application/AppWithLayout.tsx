@@ -24,6 +24,8 @@ import ForgotUsernamePage from "../login/ForgotUsernamePage";
 import LogoutPage from "../login/LogoutPage";
 import { useFriendRequestsStore } from "@/hooks/useFriendRequestsStore";
 import StatsPage from "./StatsPage";
+import PrivacyPolicyPage from "./PrivacyPolicyPage";
+import DeleteAccountPage from "../login/DeleteAccountPage";
 
 export default function AppWithLayout() {
   const [howToPlayModalOpen, setHowToPlayModalOpen] = useState(false);
@@ -99,6 +101,8 @@ export default function AppWithLayout() {
         <Route path="/forgotpassword" element={<ForgotPasswordPage />} />
         <Route path="/forgotusername" element={<ForgotUsernamePage />} />
         <Route path="/stats" element={<StatsPage />} />
+        <Route path="/privacy" element={<PrivacyPolicyPage />} />
+        <Route path="/delete" element={<DeleteAccountPage />} />
         <Route path="*" element={<div className="p-4">404 Not Found</div>} />
       </Routes>
 
