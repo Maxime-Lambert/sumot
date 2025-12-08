@@ -1,69 +1,56 @@
-# React + TypeScript + Vite
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+# Sumot
 
-Currently, two official plugins are available:
+**Sumot** est une SPA développée avec **React**, conçue pour jouer à retrouver chaque jour un nouveau mot nommé **Sumot**.
+Ce projet personnel a pour objectif de renforcer mes compétences en **React** et intégrer pour la première fois **Vite/Tailwind**. Le projet utilise l'**API** [DailyQuiz](https://github.com/Maxime-Lambert/DailyQuizAPI) également faite par moi-même et possède un port **Android** fait par un [collègue](https://gitlab.com/Frederic_Fierobe "https://gitlab.com/Frederic_Fierobe") que vous pourrez retrouver sur le Google Play Store.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🧠 Objectif
 
-## Expanding the ESLint configuration
+Ce projet permet de :
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- Jouer à trouver un sumot chaque jour
+- Jouer en infini
+- Jouer à travers l'historique des sumots
+- Ajouter des amis, comparer vos essais
 
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## ⚙️ Stack technique
 
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
+| Composant             | Détail                                       |
+|----------------------|-----------------------------------------------|
+| **Langages**          | TypeScript / HTML / CSS                                    |
+| **Librairies**        | React / Vite / Tailwind / Axios / Shadcn                       |
+| **Authentification** | JWT Token                          |
+| **Déploiement**      | Azure Static Web Apps                                |
+| **CI/CD**            | GitHub Actions                                |
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+---
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## 📦 Architecture du projet
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+Le projet est réalisé en Vertical Slice Architecture avec les problématiques communes séparées et mises à la racine.
 
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+---
+
+🌐 Déploiement
+
+Déployé sur Azure Static Web Apps :
+
+CI/CD avec Github Actions
+
+Lié à un domaine acheté sur OVH : [https://www.sumot.app/](https://www.sumot.app/)
+
+---
+
+👤 Auteur
+
+Maxime Lambert
+Développeur full stack
+📧 lambert.maxime@protonmail.com
+🌐 [LinkedIn](https://www.linkedin.com/in/maximelambert35/)
+
+---
+
+📝 Licence
+
+Ce projet est sous licence MIT.
+Tu es libre de l’utiliser, le modifier et le distribuer.
