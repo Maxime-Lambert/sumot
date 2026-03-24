@@ -40,31 +40,34 @@ export default function StatsPage() {
     load();
   }, []);
 
-  const mergedMap: Record<string, SumotStatsMerged> = data.reduce((acc, s) => {
-    if (!acc[s.date]) {
-      acc[s.date] = {
-        date: s.date,
-        mobileVisits: 0,
-        webVisits: 0,
-        mobileAttempts: 0,
-        webAttempts: 0,
-        mobileFinishes: 0,
-        webFinishes: 0,
-      };
-    }
+  const mergedMap: Record<string, SumotStatsMerged> = data.reduce(
+    (acc, s) => {
+      if (!acc[s.date]) {
+        acc[s.date] = {
+          date: s.date,
+          mobileVisits: 0,
+          webVisits: 0,
+          mobileAttempts: 0,
+          webAttempts: 0,
+          mobileFinishes: 0,
+          webFinishes: 0,
+        };
+      }
 
-    if (s.isMobile) {
-      acc[s.date].mobileVisits += s.visits;
-      acc[s.date].mobileAttempts += s.attempts;
-      acc[s.date].mobileFinishes += s.finishes;
-    } else {
-      acc[s.date].webVisits += s.visits;
-      acc[s.date].webAttempts += s.attempts;
-      acc[s.date].webFinishes += s.finishes;
-    }
+      if (s.isMobile) {
+        acc[s.date].mobileVisits += s.visits;
+        acc[s.date].mobileAttempts += s.attempts;
+        acc[s.date].mobileFinishes += s.finishes;
+      } else {
+        acc[s.date].webVisits += s.visits;
+        acc[s.date].webAttempts += s.attempts;
+        acc[s.date].webFinishes += s.finishes;
+      }
 
-    return acc;
-  }, {} as Record<string, SumotStatsMerged>);
+      return acc;
+    },
+    {} as Record<string, SumotStatsMerged>,
+  );
 
   const merged = Object.values(mergedMap);
 
@@ -173,7 +176,7 @@ export default function StatsPage() {
             />
           )}
 
-          {showWeb && showAttempts && (
+          {showMobile && showAttempts && (
             <Line
               type="monotone"
               dataKey="mobileAttempts"
@@ -182,7 +185,7 @@ export default function StatsPage() {
             />
           )}
 
-          {showWeb && showFinishes && (
+          {showMobile && showFinishes && (
             <Line
               type="monotone"
               dataKey="mobileFinishes"
