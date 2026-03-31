@@ -5,11 +5,13 @@ import type { Sumot } from "@/types/Sumot";
 interface DefinitionPanelProps {
   solution?: Sumot;
   onReady?: () => void;
+  isGameOver?: boolean;
 }
 
 export default function DefinitionPanel({
   solution,
   onReady,
+  isGameOver,
 }: DefinitionPanelProps) {
   const contentRef = useRef<HTMLDivElement>(null);
 
@@ -23,7 +25,7 @@ export default function DefinitionPanel({
     onReady?.();
   }, [solution, onReady]);
 
-  if (!solution) return null;
+  if (!solution || !isGameOver) return null;
 
   return (
     <div className="w-full p-4 border border-secondary-container-border rounded-xl bg-secondary-container text-sm text-white">
