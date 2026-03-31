@@ -10,11 +10,13 @@ import { LetterCellBase } from "./LetterCellBase";
 interface GameResultPanelProps {
   solution?: Sumot;
   status: GameStatesEnum;
+  isGameOver?: boolean;
 }
 
 export default function GameResultPanel({
   solution,
   status,
+  isGameOver,
 }: GameResultPanelProps) {
   const isWin = status === GameStates.WON;
   const [defReady, setDefReady] = useState(false);
@@ -89,6 +91,7 @@ export default function GameResultPanel({
           key={solution.word}
           solution={solution}
           onReady={() => setDefReady(true)}
+          isGameOver={isGameOver}
         />
       </CardContent>
     </Card>

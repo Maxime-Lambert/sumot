@@ -53,7 +53,7 @@ export default function Sumot() {
   const orderedSumots = useMemo(
     () =>
       sumots.filter((s) => s.day).sort((a, b) => (a.day! < b.day! ? 1 : -1)),
-    [sumots]
+    [sumots],
   );
 
   function applyGuesses(guesses: Guess[], match: string) {
@@ -79,7 +79,7 @@ export default function Sumot() {
           return;
         }
         match = loaded.find(
-          (s) => s.day?.toLowerCase() === dayParam.toLowerCase()
+          (s) => s.day?.toLowerCase() === dayParam.toLowerCase(),
         );
       } else if (infiniteParam) {
         const pool = playsWithDifficultWords
@@ -147,7 +147,7 @@ export default function Sumot() {
       inputKey(
         e.key,
         sumots.map((s) => s.word),
-        infiniteParam !== null
+        infiniteParam !== null,
       );
     };
     window.addEventListener("keydown", onKeyDown);
@@ -240,7 +240,11 @@ export default function Sumot() {
           </div>
           {!isSmallScreen && (
             <div className="sm:w-[360px]">
-              <GameResultPanel solution={solution} status={status} />
+              <GameResultPanel
+                solution={solution}
+                status={status}
+                isGameOver={isGameOver}
+              />
             </div>
           )}
         </div>
