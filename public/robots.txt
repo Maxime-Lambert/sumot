@@ -1,0 +1,15 @@
+User-agent: *
+Allow: /
+Disallow: /logout/
+Disallow: /account/
+Disallow: /friends/
+Disallow: /confirmemail/
+Disallow: /resetpassword/
+Disallow: /rollback/
+Disallow: /forgotpassword/
+Disallow: /forgotusername/
+Disallow: /stats/
+Disallow: /signup/
+Disallow: /privacy/
+Disallow: /delete/
+Sitemap: https://www.sumot.app/sitemap.xml

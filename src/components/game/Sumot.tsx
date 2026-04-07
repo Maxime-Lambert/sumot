@@ -279,6 +279,7 @@ export default function Sumot() {
         onClose={() => setShowResultModal(false)}
         status={status}
         solution={solution}
+        isGameOver={isGameOver}
       />
     </div>
   );
