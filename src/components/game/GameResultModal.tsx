@@ -8,6 +8,7 @@ interface GameResultModalProps {
   onClose: () => void;
   solution?: Sumot;
   status: GameStatesEnum;
+  isGameOver: boolean;
 }
 
 export default function GameResultModal({
@@ -15,12 +16,17 @@ export default function GameResultModal({
   onClose,
   solution,
   status,
+  isGameOver,
 }: GameResultModalProps) {
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogTitle></DialogTitle>
       <DialogContent className="w-full max-w-md">
-        <GameResultPanel solution={solution} status={status} />
+        <GameResultPanel
+          solution={solution}
+          status={status}
+          isGameOver={isGameOver}
+        />
       </DialogContent>
     </Dialog>
   );
